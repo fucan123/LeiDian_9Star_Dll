@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{f20f8d4d-0ded-40b3-84e1-16b8402d067f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Self">
+      <UniqueIdentifier>{0827147e-b312-4de7-b9c4-88d981288cb0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DLL_Test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameMain.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Game.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameStruct.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Item.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Talk.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Move.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GuaiWu.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameProc.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameStep.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Magic.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Pet.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameConf.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\GameClient.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DLL_Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GameMain.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Game.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Item.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Talk.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Move.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GuaiWu.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GameProc.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GameStep.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Magic.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Pet.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GameConf.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\GameClient.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

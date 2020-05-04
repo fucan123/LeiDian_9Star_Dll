@@ -154,7 +154,7 @@ void GameProc::Run()
 		Sleep(500);
 	}
 #endif
-	m_pGame->m_pGameConf->ReadConf(m_pGame->m_chPath);
+	//m_pGame->m_pGameConf->ReadConf(m_pGame->m_chPath);
 	if (!m_pGameStep->InitSteps(m_pGame->m_chPath, m_pGame->m_pGameConf->m_Setting.FBFile)) {
 		printf("初始化步骤失败，无法继续运行！！！\n");
 		return;
@@ -233,17 +233,27 @@ int GameProc::ViteInTeam(const char* name)
 	if (!m_pGame->Call_IsTeamLeader()) // 不是队长
 		return -1;
 
-	printf("邀请玩家:%s入队\n", name);
+	GoFBDoor();
+	Sleep(2000);
+
+	char log[128];
+	printf(log, "邀请玩家:%s入队", name);
+	sprintf_s(log, "邀请玩家:%s入队", name);
+	SendMsg(log);
 	for (int i = 0; i < 10; i++) {
 		DWORD id = m_pGame->m_pTalk->GetNPCId(name);
 		if (id) {
 			m_pGame->Call_TeamInvite(id);
 			printf("已邀请玩家:%s入队\n", name);
+			sprintf_s(log, "已邀请玩家:%s入队", name);
+			SendMsg(log);
 			return 1;
 		}
 		Sleep(1000);
 	}
 	printf("玩家:%s找不到\n", name);
+	sprintf_s(log, "玩家:%s找不到", name);
+	SendMsg(log);
 	return 0;
 }
 
@@ -269,7 +279,8 @@ void GameProc::InTeam()
 void GameProc::ViteInFB()
 {
 	printf("邀请进副本\n");
-	Wait(2 * 1000);
+	Wait(5 * 1000);
+	SendMsg("邀请进副本...");
 	m_pGame->Call_CheckTeam();
 	Wait(1 * 1000);
 	for (int i = 0; i < 5; i++) {
@@ -279,7 +290,7 @@ void GameProc::ViteInFB()
 	}
 
 	m_bAtFB = true;
-	SendMsg("邀请进副本");
+	SendMsg("邀请进副本完成.");
 }
 
 // 同意进副本
@@ -331,11 +342,12 @@ void GameProc::GoLeiMing()
 // 去领取项链
 void GameProc::GoGetXiangLian(bool is_get)
 {
+	SendMsg("去领项链");
 	int x = 250, y = 500;
-	if (m_pGame->IsGetXL())
+
+	if (is_get && m_pGame->IsGetXL())
 		goto end;
 
-	SendMsg("去领项链");
 	if (m_pGame->IsInArea(x, y))
 		goto get;
 
@@ -411,45 +423,48 @@ bool GameProc::GoInFB()
 
 	int select_no = 0x01;
 	int select_count = 1000;
-	if (m_pGame->IsBig()) { // 大号进的
-		if (!m_pGame->m_pItem->GetSelfItemCountByName("卡利亚堡钥匙")) { // 没有副本钥匙
-			m_pGame->m_pClient->Send(SCK_NOYAOSI, true);
-			SendMsg("无卡利亚堡钥匙");
-			return false;
-		}
-		SYSTEMTIME stLocal;
-		::GetLocalTime(&stLocal);
-		if (stLocal.wHour >= 20 && stLocal.wHour <= 23) { // 在免费时间段里面
+
+	bool free_in = false; // 是否可以免费进
+	SYSTEMTIME stLocal;
+	::GetLocalTime(&stLocal);
+	if (stLocal.wHour >= 20 && stLocal.wHour <= 23) { // 20点到24点可以免费进
+		free_in = stLocal.wHour == 23 ? stLocal.wMinute < 59 : true; // 至少需要1分钟
+	}
+
+	if (free_in) { // 免费进
+		if (m_pGame->m_pItem->GetSelfItemCountByName("卡利亚堡钥匙")) { // 没有副本钥匙
 			select_no = 0x00; // 第一个选项
 			select_count = 3; // 试三次
-			if (!m_pGame->m_Account.IsMeOpenFB) {
-				Wait(30 * 1000);
-			}
+			SendMsg("用卡利亚堡钥匙进入.");
+		}
+		else {
+			//m_pGame->m_pClient->Send(SCK_NOYAOSI, true);
+			SendMsg("无卡利亚堡钥匙, 用项链进入.");
 		}
 	}
 
 	SendMsg("开启副本");
 	while (true) {
 		for (int j = 0; j < select_count; j++) {
-			if ((j % 5) == 0) {
-				GoGetXiangLian(false);
-				GoFBDoor();
-			}
-
 			if (IsNeedAddLife() == -1) {
 				ReBorn(1);
 				Sleep(1000);
 			}
 
-			m_pGame->m_pTalk->NPC("卡利亚堡传送门");
+			if (!m_pGame->m_pTalk->NPC("卡利亚堡传送门")) {
+				GoGetXiangLian(false);
+				GoFBDoor();
+				continue;
+			}
+
 			Wait(1 * 1000);
 			m_pGame->m_pTalk->NPCTalk(select_no);
 			Wait(1 * 1000);
 			m_pGame->m_pTalk->NPCTalk(0x00);
-			Wait(5 * 1000);
+			Wait(2 * 1000);
 
 			if (m_pGame->IsInFB()) {
-				Sleep(1000);
+				Sleep(2000);
 				ViteInFB();
 				m_pGame->m_Account.IsMeOpenFB = true;
 				return true;
@@ -480,7 +495,13 @@ void GameProc::ContinueInFB()
 	SendMsg("继续呆副本");
 	printf("继续副本\n");
 	for (int j = 0; j < 3; j++) {
-		m_pGame->m_pTalk->NPC("卡利亚堡传送门");
+		if (!m_pGame->m_pTalk->NPC("卡利亚堡传送门")) {
+			GoGetXiangLian(false);
+			GoFBDoor();
+			j--;
+			continue;
+		}
+
 		Wait(1 * 1000);
 		m_pGame->m_pTalk->NPCTalk(0x00);
 		Wait(1 * 1000);
@@ -1215,14 +1236,14 @@ void GameProc::Small()
 void GameProc::ReBorn(int flag)
 {
 	printf("没有血量了, 等待复活\n");
-	SMSG_N(64, "需要复活, 位置:%d,%d", m_pStep->X, m_pStep->Y);
+	SendMsg("没有血量了, 等待复活.");
 	Wait(25 * 1000);
 	m_pGame->m_pClient->Send(SCK_REBORN, true); // 通知服务端复活了
 	m_pGame->Call_ReBoren(flag);
 
 	Sleep(1000);
 	// 出征宠物
-	m_pGame->m_pPet->PetOut(m_pGame->m_pGameConf->m_stPetOut.No, m_pGame->m_pGameConf->m_stPetOut.Length, true);
+	//m_pGame->m_pPet->PetOut(m_pGame->m_pGameConf->m_stPetOut.No, m_pGame->m_pGameConf->m_stPetOut.Length, true);
 }
 
 // 是否检查此NPC对话完成

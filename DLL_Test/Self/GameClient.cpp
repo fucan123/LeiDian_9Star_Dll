@@ -163,14 +163,39 @@ void GameClient::SmallOutFB()
 // 获取进副本项链数量
 void GameClient::GetXL()
 {
-	// 获取项链
-	m_pGame->m_pGameProc->GoGetXiangLian();
+	bool free_in = false; // 是否可以免费进
+	SYSTEMTIME stLocal;
+	::GetLocalTime(&stLocal);
+	if (stLocal.wHour >= 20 && stLocal.wHour <= 23) { // 20点到24点可以免费进
+		free_in = stLocal.wHour == 23 ? stLocal.wMinute < 59 : true; // 至少需要1分钟
+	}
 
-	int count = m_pGame->m_pItem->GetSelfItemCountByName("爱娜祈祷项链");
-	printf("拥有项链数量:%d\n", count);
-	m_Client.ClearSendString();
-	m_Client.SetInt(count);
-	Send(SCK_GETXL, false);
+	if (!free_in) {
+		// 获取项链[爱娜祈祷项链]
+		m_pGame->m_pGameProc->GoGetXiangLian();
+		int count = m_pGame->m_pItem->GetSelfItemCountByName("爱娜祈祷项链");
+		printf("拥有项链数量:%d\n", count);
+
+		char msg[32];
+		sprintf_s(msg, "拥有项链数量[new]:%d\n", count);
+		SendMsg(msg);
+
+		m_Client.ClearSendString();
+		m_Client.SetInt(count);
+		Send(SCK_GETXL, false);
+	}
+	else {
+		int count = m_pGame->m_pItem->GetSelfItemCountByName("卡利亚堡钥匙");
+		printf("拥有钥匙数量:%d\n", count);
+
+		char msg[32];
+		sprintf_s(msg, "拥有钥匙数量:%d\n", count);
+		SendMsg(msg);
+
+		m_Client.ClearSendString();
+		m_Client.SetInt(count);
+		Send(SCK_GETXL, false);
+	}
 }
 
 // 关闭游戏

@@ -3,6 +3,7 @@
 #include <My/Common/mystring.h>
 #include <My/Common/func.h>
 #include <My/Driver/KbdMou.h>
+#include <My/Common/C.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -237,6 +238,12 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 	FindAllCall();
 	//while (true) Sleep(1000);
 	FindBagAddr();
+
+	GetWindowRect(m_hWnd, &m_GameWnd.Rect);
+	m_GameWnd.Width = m_GameWnd.Rect.right - m_GameWnd.Rect.left;
+	m_GameWnd.Height = m_GameWnd.Rect.bottom - m_GameWnd.Rect.top;
+	::printf("窗口句柄:%0x %d %d %.2\n", m_hWnd, m_GameWnd.Width, m_GameWnd.Height, m_fScale);
+	::printf("游戏画面窗口:%08X %.2f\n", m_hWndPic, m_fScale);
 	
 #if 1
 	if (!ReadGameMemory()) {
@@ -349,7 +356,7 @@ bool Game::IsMoYu()
 	wchar_t name[32] = { 0 };
 	GetProcessName(name, GetCurrentProcessId());
 	::wprintf(L"%ws = %ws\n", name, L"soul.exe");
-	return wcsstr(name, L"soul.exe") != nullptr;
+	return wcsstr(name, L"soul.exe") != nullptr || wcsstr(name, L"SOUL.exe") != nullptr;
 }
 
 // 是否登录了
@@ -499,8 +506,31 @@ HWND Game::FindGameWnd()
 	GetWindowRect(m_hWnd, &m_GameWnd.Rect);
 	m_GameWnd.Width = m_GameWnd.Rect.right - m_GameWnd.Rect.left;
 	m_GameWnd.Height = m_GameWnd.Rect.bottom - m_GameWnd.Rect.top;
-	::printf("窗口句柄:%0x %d %d %.2\n", m_hWnd, m_GameWnd.Width, m_GameWnd.Height, m_fScale);
-	::printf("游戏画面窗口:%08X\n", m_hWndPic);
+	::printf("窗口句柄:%0x->%0x->%0x %d %d %.2\n", m_hWnd, m_hWnd2, m_hWndPic, m_GameWnd.Width, m_GameWnd.Height, m_fScale);
+	
+#if 0
+	int n = 0;
+	while (true) {
+		n++;
+		HWND child, parent;
+		FindButtonWnd(BUTTON_ID_MAGIC, child, parent, "技能");
+
+		HWND talkWnd = FindWindowEx(m_hWnd2, NULL, NULL, NULL);
+		::printf("%d.游戏对话窗口:%08X,%08X\n", n, talkWnd, child);
+		Sleep(1000);
+
+		if (n >= 60) {
+			if ((n % 60) == 0) {
+				printf("点击F1\n");
+				ClickMagic(VK_F1);
+			}
+			if ((n % 25) == 0) {
+				printf("点击用卡利亚堡钥匙开启进入\n");
+				SelectTalkNo("钥匙开启副本");
+			}
+		}
+	}
+#endif
 
 	m_pClient->SendOpen(m_fScale, m_hWnd, m_GameWnd.Rect); // 通知窗口已打开
 	return m_hWnd;
@@ -831,9 +861,9 @@ bool Game::FindMoveStaAddr()
 // 获取对话框状态地址
 bool Game::FindTalkBoxStaAddr()
 {
-	// 4:0x017E242C 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
+	// 4:0x018664FC 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
 	DWORD codes[] = {
-		0x017E242C, 0x00000001, 0x00000000, 0x00000000,
+		0x018664FC, 0x00000001, 0x00000000, 0x00000000,
 		0x00000000, 0x00000001, 0x00000000, 0x00000022
 	};
 	DWORD address = 0;
@@ -849,10 +879,11 @@ bool Game::FindTalkBoxStaAddr()
 // 获取是否选择邀请队伍状态地址
 bool Game::FindTeamChkStaAddr()
 {
-	// 2F68
-	// 4:0x0173BACC 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
+	// 3104
+	// 4:0x01764D2C 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
+	// 11F88BAC
 	DWORD codes[] = {
-		0x0173BACC, 0x00000001, 0x00000000, 0x00000000,
+		0x01764D2C, 0x00000001, 0x00000000, 0x00000000,
 		0x00000000, 0x00000001, 0x00000000, 0x00000022
 	};
 	DWORD address = 0; // 这个地址是Call选择是否邀请队伍函数中esi的值 mov ecx,dword ptr ds:[esi+0x1DC]
@@ -897,7 +928,7 @@ bool Game::FindLifeAddr()
 	};
 	DWORD address = 0;
 	if (SearchCode(codes, sizeof(codes) / sizeof(DWORD), &address, 1, 1)) {
-		m_GameAddr.Life = address + 0x24;
+		m_GameAddr.Life = address + 0x20;
 		m_GameAddr.LifeMax = m_GameModAddr.Mod3DRole + ADDR_LIFEMAX_OFFSET;
 		::printf("找到生命地址：%08X\n", m_GameAddr.Life);
 		::printf("找到生命上限地址：%08X\n", m_GameAddr.LifeMax);
@@ -1000,9 +1031,9 @@ bool Game::FindPetPtrAddr()
 	m_GameAddr.PetPtr = address;
 	::printf("宠物列表基址:%08X\n", address);
 #else
-	// 4:0x0178E87C 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
+	// 4:0x017BEF6C 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
 	DWORD codes[] = {
-		0x0178E87C, 0x00000001, 0x00000000, 0x00000000,
+		0x017BEF6C, 0x00000001, 0x00000000, 0x00000000,
 		0x00000000, 0x00000001, 0x00000000, 0x00000022,
 		//0x00000022, 0x00000000, 0x00000010, 0x00000022,
 		//0xFFFFFFFF, 0x00000000, 0x00000000, 0x00000000,
@@ -1035,7 +1066,7 @@ bool Game::FindMapName()
 
 			if (name[0] == 0 || name[0] == 0xff) {
 				m_pClient->SendMsg("没有找到地图名称, 重启游戏机.|red");
-				Close(false);
+				//Close(false);
 			}
 			else {
 				char str[32];
@@ -1779,6 +1810,67 @@ void Game::MouseMove(int x, int y, HWND hwnd)
 	Sleep(50);
 }
 
+// 选择对话选项
+void Game::SelectTalkNo(const char* name)
+{
+	// 用卡利亚堡钥匙开启进入(50,126-235,135)
+	// 用爱娜祈祷项链开启进入(50,162-235,168)
+	int x = MyRand(50, 235), y = 0;
+	if (strcmp(name, "钥匙开启副本") == 0) {
+		y = MyRand(126, 135);
+	}
+	else if (strcmp(name, "项链开启副本") == 0) {
+		y = MyRand(162, 168);
+	}
+	else if (strcmp(name, "继续副本") == 0) {
+	}
+	else if (strcmp(name, "离开副本") == 0) {
+	}
+	else if (strcmp(name, "领取特球") == 0) {
+	}
+	else if (strcmp(name, "领取项链") == 0) {
+	}
+
+	SelectTalkNo(x, y);
+}
+
+// 选择对话选项
+void Game::SelectTalkNo(int x, int y)
+{
+	HWND talkWnd = FindWindowEx(m_hWnd2, NULL, NULL, NULL);
+	RECT rect;
+	::GetWindowRect(talkWnd, &rect);
+
+	x += rect.left;
+	y += rect.top;
+	::SetCursorPos(x, y);
+	Sleep(100);
+	LeftClick(x, y, talkWnd);
+	printf("选择对话选项:%d,%d\n", x, y);
+}
+
+void Game::ClickMagic(char key)
+{
+	// 技能F1(3,10-20,20)
+	// 技能F2(35,10-55,20)
+
+	int x = MyRand(3, 20), y = MyRand(10, 20);
+	if (key == VK_F1) {
+		x = MyRand(3, 20);
+	}
+	if (key == VK_F2) {
+		x = MyRand(35, 55);
+	}
+	else {
+		int offset = (key - VK_F1) * 25;
+		x += offset;
+	}
+
+	HWND child, parent;
+	FindButtonWnd(BUTTON_ID_MAGIC, child, parent, "技能");
+	RightClick(x, y, child);
+}
+
 // 构造栈
 void Game::FakeStackFrame(DWORD stack[], DWORD frames[], DWORD length)
 {
@@ -1865,9 +1957,11 @@ void Game::Call_Talk(const char* msg, int type)
 	else {
 		return;
 	}
+
+	char* text = (char*)(m_GameAddr.CoorX + 0x30);
 	// 15A62D0
-	ZeroMemory((PVOID)0x195088, 0x100);
-	memcpy((PVOID)0x195088, msg, strlen(msg));
+	ZeroMemory((PVOID)text, 0x30);
+	memcpy((PVOID)text, msg, strlen(msg));
 
 	ASM_STORE_ECX();
 	ASM_SET_ECX();
@@ -1877,7 +1971,7 @@ void Game::Call_Talk(const char* msg, int type)
 		push arg
 		push 0x00FFFF00
 		push 0x00       // 0x015A63F8 // 可能是变量地址
-		push 0x195088   // 喊话内容[固定地址]
+		push text       // 喊话内容[固定地址]
 		push 0x00       // 0x015A63D8 // 可能是变量地址
 		call func
 	}
@@ -1991,7 +2085,7 @@ void Game::Call_NPCTalk(int no, bool close)
 	}
 _mid_:
 	ASM_FAKE_STACK_END()
-	if (m_GameCall.NPCTalk) {
+	if (0 && m_GameCall.NPCTalk) {
 		_FUNC1 func3 = (_FUNC1)m_GameCall.NPCTalk;
 		_asm {
 			mov ecx, _esi
@@ -2848,6 +2942,78 @@ void Game::Call_TeamAutoJoin(int open)
 // 是否选择邀请队伍
 void Game::Call_CheckTeam(int v)
 {
+#if 1
+	SetForegroundWindow(m_hWnd);
+
+#if 0
+	HWND hWnd = m_hWnd;
+	DWORD dwForeID;
+	DWORD dwCurID;
+
+	HWND hForeWnd = GetForegroundWindow();
+	dwCurID = GetCurrentThreadId();
+	dwForeID = GetWindowThreadProcessId(hForeWnd, NULL);
+	AttachThreadInput(dwCurID, dwForeID, TRUE);
+	ShowWindow(hWnd, SW_SHOWNORMAL);
+	SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	SetForegroundWindow(hWnd);
+	AttachThreadInput(dwCurID, dwForeID, FALSE);
+#else
+#if 1
+	//必须动态加载这个函数。  
+	typedef void (WINAPI *PROCSWITCHTOTHISWINDOW)(HWND, BOOL);
+	PROCSWITCHTOTHISWINDOW SwitchToThisWindow;
+	HMODULE hUser32 = GetModuleHandle(L"user32");
+	SwitchToThisWindow = (PROCSWITCHTOTHISWINDOW)
+		GetProcAddress(hUser32, "SwitchToThisWindow");
+
+	//接下来只要用任何现存窗口的句柄调用这个函数即可，
+	//第二个参数表示如果窗口处于最小化状态，是否恢复。
+	SwitchToThisWindow(m_hWnd, TRUE);
+#endif
+#endif
+
+	HWND child, parent;
+	while (true) {
+		if (FindButtonWnd(BUTTON_ID_SURE, child, parent, nullptr))
+			break;
+
+		Sleep(1000);
+	}
+
+	ShowWindow(m_hWnd, SW_SHOWNORMAL);
+	SetForegroundWindow(m_hWnd);
+	Sleep(1000);
+	GetWindowRect(m_hWnd, &m_GameWnd.Rect);
+	m_GameWnd.Width = m_GameWnd.Rect.right - m_GameWnd.Rect.left;
+	m_GameWnd.Height = m_GameWnd.Rect.bottom - m_GameWnd.Rect.top;
+	::printf("窗口句柄:%0x %d %d %d %d %.2f\n", m_hWnd, m_GameWnd.Width, m_GameWnd.Height,
+		m_GameWnd.Rect.left, m_GameWnd.Rect.top, m_fScale);
+
+	//SwitchToThisWindow(m_hWnd, TRUE);
+	SetForegroundWindow(m_hWnd);
+	int clx = m_GameWnd.Rect.left + 466, cly = m_GameWnd.Rect.top + 479;
+	if (!SetCursorPos(clx, cly)) {
+		m_pGameProc->SendMsg("鼠标设置失败, 移动鼠标.|red");
+		mouse_event(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE, clx * 65536 / GetSystemMetrics(SM_CXSCREEN),
+			cly * 65536 / GetSystemMetrics(SM_CYSCREEN), 0, 0);
+	}
+	//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, clx, cly, 0, 0);
+	Sleep(500);
+	HWND hWnd = parent;
+	LeftClick(107, 216, hWnd);
+	//mouse_event(MOUSEEVENTF_LEFTDOWN, clx, cly, 0, 0);//点下左键
+	//mouse_event(MOUSEEVENTF_LEFTUP, clx, cly, 0, 0);//点下左键
+	printf("点击(%d %d)\n", clx, cly);
+
+	char msg[64];
+	sprintf_s(msg, "点击(%d %d)\n", clx, cly);
+	m_pGameProc->SendMsg(msg);
+
+	return;
+#endif
+
 	if (!m_GameAddr.TeamChkSta)
 		return;
 

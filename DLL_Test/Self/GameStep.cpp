@@ -89,6 +89,10 @@ STEP_CODE GameStep::NextCode(vector<_step_*>& link)
 // 初始化步骤
 bool GameStep::InitSteps(const char* path, const char* file)
 {
+	// 初始化神殿去雷鸣步骤
+	InitGoLeiMingSteps();
+	return true;
+
 	char fb_file[255];
 	sprintf_s(fb_file, "%s\\%s", path, file);
 	
@@ -99,8 +103,7 @@ bool GameStep::InitSteps(const char* path, const char* file)
 		return false;
 	}
 
-	// 初始化神殿去雷鸣步骤
-	InitGoLeiMingSteps();
+	
 
 	int i = 0, index = 0;
 	int length = 0;

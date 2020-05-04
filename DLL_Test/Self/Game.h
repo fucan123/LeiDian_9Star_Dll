@@ -295,6 +295,12 @@ public:
 	void RightClick(int x, int y, HWND hwnd = NULL, int num=1);
 	// 鼠标移动
 	void MouseMove(int x, int y, HWND hwnd=NULL);
+	// 选择对话选项
+	void SelectTalkNo(const char* name);
+	// 选择对话选项
+	void SelectTalkNo(int x, int y);
+	// 点击技能栏
+	void ClickMagic(char key);
 
 	// 构造栈
 	void FakeStackFrame(DWORD stack[], DWORD frames[], DWORD length);

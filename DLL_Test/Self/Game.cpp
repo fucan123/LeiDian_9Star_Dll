@@ -1,3 +1,5 @@
+#include "Home.h"
+
 #include "GameClient.h"
 #include <My/Common/Explode.h>
 #include <My/Common/mystring.h>
@@ -12,10 +14,6 @@
 #include "GameProc.h"
 #include "Item.h"
 #include "Talk.h"
-#include "Move.h"
-#include "GuaiWu.h"
-#include "Magic.h"
-#include "Pet.h"
 
 // 游戏g_pObjHero全局变量(CHero类this指针)
 DWORD g_pObjHero = NULL;
@@ -39,18 +37,21 @@ Game::Game()
 	ZeroMemory(&m_Account, sizeof(m_Account));
 	//m_Account.IsBig = true;
 
+	m_nVerFail = 0;
+
 	m_bIsReadEnd = true;
 	m_pReadBuffer = new BYTE[1024 * 1024 * 10];
 
+	m_pHome     = new Home(this);
 	m_pClient   = new GameClient(this);
 	m_pClient->SetSelf(m_pClient);
 
 	m_pItem     = new Item(this);      // 物品类
 	m_pTalk     = new Talk(this);      // 对话类
-	m_pMove     = new Move(this);      // 移动类
-	m_pGuaiWu   = new GuaiWu(this);    // 怪物类
-	m_pMagic    = new Magic(this);     // 技能类
-	m_pPet      = new Pet(this);       // 宠物类
+	//m_pMove     = new Move(this);      // 移动类
+	//m_pGuaiWu   = new GuaiWu(this);    // 怪物类
+	//m_pMagic    = new Magic(this);     // 技能类
+	//m_pPet      = new Pet(this);       // 宠物类
 
 	m_pGameConf = new GameConf(this);  // 游戏配置类
 	m_pGameProc = new GameProc(this);  // 执行过程类
@@ -62,16 +63,37 @@ Game::~Game()
 	delete m_pReadBuffer;
 
 	delete m_pClient;
-	delete m_pItem;
-	delete m_pTalk;
-	delete m_pMove;
-	delete m_pGuaiWu;
-	delete m_pMagic;
-	delete m_pPet;
+	//delete m_pItem;
+	//delete m_pTalk;
+	//delete m_pMove;
+	//delete m_pGuaiWu;
+	//delete m_pMagic;
+	//delete m_pPet;
 
 	delete m_pGameProc;
 
 	Drv_DisConnectDriver();
+}
+
+// 验证
+void Game::VerifyServer()
+{
+	int n = 0;
+	while (true) {
+		if (++n == 30) {
+			if (m_pHome->Verify()) {
+				m_nVerFail = 0;
+			}
+			else {
+				if (++m_nVerFail >= 15) {
+					while (true);
+				}
+			}
+			n = 0;
+		}
+		
+		Sleep(5000);
+	}
 }
 
 // 关闭游戏
@@ -225,6 +247,13 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 	FindAllModAddr();
 	FindCoorAddr();
 
+#if 0
+	while (true) {
+		printf("while (true7).\n");
+		Sleep(5000);
+	}
+#endif
+
 	m_Account.IsLogin = 1;
 
 	WaitGameInit(60);
@@ -239,6 +268,8 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 	//while (true) Sleep(1000);
 	FindBagAddr();
 
+	
+	
 	GetWindowRect(m_hWnd, &m_GameWnd.Rect);
 	m_GameWnd.Width = m_GameWnd.Rect.right - m_GameWnd.Rect.left;
 	m_GameWnd.Height = m_GameWnd.Rect.bottom - m_GameWnd.Rect.top;
@@ -246,9 +277,17 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 	::printf("游戏画面窗口:%08X %.2f\n", m_hWndPic, m_fScale);
 	
 #if 1
+	
+	/*
 	if (!ReadGameMemory()) {
-		INLOG("无法获得人物血量地址！！！");
+		//INLOG("无法获得人物血量地址！！！");
 		return false;
+	}
+	*/
+	
+	while (false) {
+		printf("while (true7).\n");
+		Sleep(5000);
 	}
 	while (!m_GameAddr.ItemPtr) {
 		::printf("获取地面物品地址...\n");
@@ -261,7 +300,8 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 		Sleep(5000);
 	}
 #endif
-	m_pMagic->ReadMagic(nullptr, nullptr, false);
+	
+	//m_pMagic->ReadMagic(nullptr, nullptr, false);
 
 	m_pClient->SendMsg("读取游戏数据完成");
 
@@ -273,6 +313,12 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 		Sleep(1000);
 	}
 #endif
+
+	while (false) {
+		printf("while (true8).\n");
+		Sleep(5000);
+	}
+	
 	return true;
 }
 
@@ -657,6 +703,8 @@ DWORD Game::FindNPCTalkCall()
 // 获取副本邀请队伍选择框函数
 DWORD Game::FindTeamChkCall()
 {
+	return 123;
+#if 0
 	// 从push 0xFFFFFF开始搜索
 	BYTE codes[] = {
 		0x68,0xff,0xff,0xff,0x00,  0x8b,0xc8,  0x8b,0x82,0x11,0x11,0x11,0x11,
@@ -675,11 +723,14 @@ DWORD Game::FindTeamChkCall()
 		::printf("副本邀请队伍选择ESI偏移:%08X\n", m_GameAddr.TeamChkOffset);
 	}
 	return address;
+#endif
 }
 
 // 数字按键函数
 DWORD Game::FindKeyNumCall()
 {
+	return 0;
+#if 0
 	// 从push 0x00开始搜索
 	DWORD codes[] = {
 		0x006A006A, 0x1234006A, 0x1234006A, 0x016A068B,
@@ -696,11 +747,14 @@ DWORD Game::FindKeyNumCall()
 		::printf("数字按键ECX指针地址:%08X\n", m_GameAddr.KeyNumEcxPtr);
 	}
 	return address;
+#endif
 }
 
 // 获取关闭提示框函数
 DWORD Game::FindCloseTipBoxCall()
 {
+	return 123;
+#if 0
 	// mov dword ptr ds:[ebx+0xA0],esi
 	// 搜索方法->CE提示框状态地址下修改断点->找到修改地址->OD下断点, 查看调用堆栈即可找到
 	DWORD codes[] = {
@@ -713,6 +767,7 @@ DWORD Game::FindCloseTipBoxCall()
 		::printf("Call关闭提示框函数地址:%08X\n", address);
 	}
 	return address;
+#endif
 }
 
 // 获取获取NPC基地址函数
@@ -879,6 +934,8 @@ bool Game::FindTalkBoxStaAddr()
 // 获取是否选择邀请队伍状态地址
 bool Game::FindTeamChkStaAddr()
 {
+	return false;
+#if 0
 	// 3104
 	// 4:0x01764D2C 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
 	// 11F88BAC
@@ -892,11 +949,14 @@ bool Game::FindTeamChkStaAddr()
 		::printf("邀请队伍状态地址：%08X\n", m_GameAddr.TeamChkSta);
 	}
 	return address > 0;
+#endif
 }
 
 // 获取提示框状态地址
 bool Game::FindTipBoxStaAddr()
 {
+	return false;
+#if 0
 	// 4:0x00F39588 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
 	DWORD codes[] = {
 		0x00F39588, 0x00000001, 0x00000000, 0x00000000,
@@ -908,6 +968,7 @@ bool Game::FindTipBoxStaAddr()
 		::printf("提示框状态地址：%08X\n", m_GameAddr.TipBoxSta);
 	}
 	return address > 0;
+#endif
 }
 
 // 获取生命地址
@@ -928,7 +989,7 @@ bool Game::FindLifeAddr()
 	};
 	DWORD address = 0;
 	if (SearchCode(codes, sizeof(codes) / sizeof(DWORD), &address, 1, 1)) {
-		m_GameAddr.Life = address + 0x20;
+		m_GameAddr.Life = address + 0x24;
 		m_GameAddr.LifeMax = m_GameModAddr.Mod3DRole + ADDR_LIFEMAX_OFFSET;
 		::printf("找到生命地址：%08X\n", m_GameAddr.Life);
 		::printf("找到生命上限地址：%08X\n", m_GameAddr.LifeMax);
@@ -1013,6 +1074,8 @@ bool Game::FindCallNPCTalkEsi()
 // 获取宠物列表基地址
 bool Game::FindPetPtrAddr()
 {
+	return false;
+#if 0
 	// 搜索方法 先找出宠物血量->CE下血量访问断点, 找到基址, 查看特征码
 	// 宠物ID[773610E3宠物名字:800750]->获得宠物ID地址->下访问断点->找到偏移
 	// 4:0x00F855F8 4:0x00000001 4:0x00000000 4:0x00000000 4:0x00000000 4:0x00000001 4:0x00000000
@@ -1046,6 +1109,7 @@ bool Game::FindPetPtrAddr()
 	}
 #endif
 	return address != 0;
+#endif
 }
 
 // 获取地图名称地址
@@ -1390,12 +1454,15 @@ bool Game::ReadLife(int& life, int& life_max)
 // 读取药包数量
 bool Game::ReadQuickKey2Num(int* nums, int length)
 {
+	return false;
+#if 0
 	if (!m_GameAddr.QuickKey2Num) {
 		memset(nums, 0, length);
 		return false;
 	}
 
 	return ReadProcessMemory(m_hGameProcess, (PVOID)m_GameAddr.QuickKey2Num, nums, length, NULL);
+#endif
 }
 
 // 读取包包物品
@@ -1476,20 +1543,12 @@ bool Game::ReadGameMemory(DWORD flag)
 				m_dwReadSize = (dwReadSize + dwOneReadSize) <= mbi.RegionSize 
 					? dwOneReadSize : mbi.RegionSize - dwReadSize;
 
-				if (ReadProcessMemory(m_hGameProcess, (LPVOID)pTmpReadAddress, m_pReadBuffer, m_dwReadSize, NULL)) {
+				SIZE_T szReadSize = 0;
+				if (ReadProcessMemory(m_hGameProcess, (LPVOID)pTmpReadAddress, m_pReadBuffer, m_dwReadSize, &szReadSize)) {
 					if (flag & 0x100) {
 						FindLoginSmallServerAddr();
 					}
 
-					if (flag & 0x10) {
-						//::printf("ReadGuaiWu\n");
-						if (!m_pGuaiWu->ReadGuaiWu())
-							flag &= ~0x10;
-					}
-					if (flag & 0x20) {
-						if (!m_pTalk->ReadNPC())
-							flag &= ~0x20;
-					}
 					//::printf("flag:%08X %p-%p\n", flag, ReadAddress, ReadAddress + mbi.RegionSize);
 
 					if (flag & 0x01) {
@@ -1913,6 +1972,7 @@ _end_:
 // 人物移动函数
 void Game::Call_Run(int x, int y)
 {
+#if 0
 	::printf("移动:%d,%d\n", x, y);
 	// 4:0x6AEC8B55 4:0xBE7468FF 4:0xA1640326 4:0x00000000 4:0x25896450 4:0x00000000 4:0x04D8EC81 4:0x56530000
 	DWORD _ebp_;
@@ -1941,11 +2001,13 @@ _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
 	//::printf("移动函数调用完成\n");
+#endif
 }
 
 // 喊话CALL[type 0=公共频道 1=私人 2=队伍]
 void Game::Call_Talk(const char* msg, int type)
 {
+#if 0
 	DWORD arg = 0, func = m_GameCall.Talk;
 	if (!func)
 		return;
@@ -1978,6 +2040,7 @@ void Game::Call_Talk(const char* msg, int type)
 
 	ASM_FAKE_STACK_END();
 	ASM_RESTORE_ECX();
+#endif
 }
 
 
@@ -2117,11 +2180,13 @@ _end_:
 // 关闭提示框
 void Game::Call_CloseTipBox(int close)
 {
+#if 0
 	::printf("关闭提示框:%d\n", close);
 	DWORD _ecx = m_GameAddr.TipBoxSta;
 	_FUNC3 func = (_FUNC3)m_GameCall.CloseTipBox;
 	__asm { mov ecx, _ecx };
 	func(0x0A, close, 0x00);
+#endif
 }
 
 // 获取仓库物品数量
@@ -2249,6 +2314,7 @@ _end_:
 // 扔物品
 void Game::Call_DropItem(int item_id)
 {
+#if 0
 	::printf("丢弃物品:%08X\n", item_id);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2275,9 +2341,11 @@ _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
 	// 4:0x00 4:0x04 4:0x80000000 4:0x80000000 4:0x7FFFFFFF 4:0x7FFFFFFF 4:* 4:0x01 4:0x19 4:0x00400000
+#endif
 }
 
 
+#if 0
 _declspec (naked) DWORD __stdcall Naked_PickUpItem(DWORD& ri, DWORD func, int id, int x, int y, DWORD addr, DWORD(&stack)[32])
 {
 	ASM_SET_ECX();
@@ -2309,10 +2377,12 @@ _declspec (naked) DWORD __stdcall Naked_PickUpItem(DWORD& ri, DWORD func, int id
 		ret 28;
 	}
 }
+#endif
 
 // 捡物品
 void Game::Call_PickUpItem(DWORD id, DWORD x, DWORD y)
 {
+#if 0
 	::printf("拾取物品:%08X %d,%d！！！\n", id, x, y);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2348,11 +2418,13 @@ void Game::Call_PickUpItem(DWORD id, DWORD x, DWORD y)
 _end_:
 	ASM_FAKE_STACK_END()
 		ASM_RESTORE_ECX();
+#endif
 }
 
 // 卖东西
 void Game::Call_SellItem(int item_id)
 {
+#if 0
 	::printf("卖东西:%08X\n", item_id);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2376,11 +2448,13 @@ void Game::Call_SellItem(int item_id)
 _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
+#endif
 }
 
 // 存钱
 void Game::Call_SaveMoney(int money)
 {
+#if 0
 	::printf("存钱:%d\n", money);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2407,11 +2481,13 @@ void Game::Call_SaveMoney(int money)
 _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
+#endif
 }
 
 // 存入远程仓库
 void Game::Call_CheckInItem(int item_id)
 {
+#if 0
 	//::printf("存入物品:%08X\n", item_id);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2436,11 +2512,13 @@ void Game::Call_CheckInItem(int item_id)
 _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
+#endif
 }
 
 // 取出仓库物品
 void Game::Call_CheckOutItem(int item_id)
 {
+#if 0
 	::printf("取出仓库物品:%08X\n", item_id);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2466,6 +2544,7 @@ void Game::Call_CheckOutItem(int item_id)
 _end_:
 	ASM_FAKE_STACK_END()
 	ASM_RESTORE_ECX();
+#endif
 }
 
 // 使用可传送物品
@@ -2496,6 +2575,7 @@ _end_:
 	ASM_RESTORE_ECX();
 }
 
+#if 0
 _declspec (naked) DWORD __stdcall Naked_Magic_GW(DWORD& ri, DWORD func, int magic_id, int guaiwu_id, DWORD addr, DWORD(&stack)[32])
 {
 	ASM_SET_ECX();
@@ -2528,10 +2608,11 @@ _declspec (naked) DWORD __stdcall Naked_Magic_GW(DWORD& ri, DWORD func, int magi
 		ret 24;
 	}
 }
-
+#endif
 // 放技能
 void Game::Call_Magic(int magic_id, int guaiwu_id)
 {
+#if 0
 	::printf("技能怪物ID:%08X %08X！！！\n", magic_id, guaiwu_id);
 	DWORD _ebp_;
 	DWORD user32 = m_GameCall.User32Ret04;
@@ -2567,9 +2648,10 @@ _end_:
 	ASM_FAKE_STACK_END();
 	ASM_RESTORE_ECX();
 	//::printf("技能使用完成\n");
+#endif
 }
 
-
+#if 0
 _declspec (naked) DWORD __stdcall Naked_Magic_XY(DWORD& ri, DWORD func, int magic_id, int x, int y, DWORD addr, DWORD(&stack)[32])
 {
 	ASM_SET_ECX();
@@ -2603,10 +2685,12 @@ _declspec (naked) DWORD __stdcall Naked_Magic_XY(DWORD& ri, DWORD func, int magi
 		ret 28;
 	}
 }
+#endif
 
 // 放技能
 void Game::Call_Magic(int magic_id, int x, int y)
 {
+#if 0
 	// 05D05020 06832EA4 mov ecx,dword ptr ds:[0xF1A518]
 	::printf("技能XY:%08X %d,%d！！！\n", magic_id, x, y);
 	DWORD _ebp_;
@@ -2645,134 +2729,38 @@ _end_:
 	ASM_FAKE_STACK_END();
 	ASM_RESTORE_ECX();
 	//::printf("技能使用完成\n");
+#endif
 }
 
 
 // 宠物出征
 void Game::Call_PetOut(int pet_id)
 {
-	// 00870741 - 89 8C B3 C0020000  - mov [ebx+esi*4+000002C0],ecx
-	// 724-008
-	::printf("宠物出征:%08X\n", pet_id);
-	DWORD _ebp_;
-	DWORD user32 = m_GameCall.User32Ret04;
-	DWORD soul = m_GameCall.SoulRet0C;
-	_FUNC2 func = (_FUNC2)m_GameCall.CallEudenmon;
-	ASM_STORE_ECX();
-	ASM_SET_ECX();
-	if (user32 && soul) {
-		//::printf("user32&&soul\n");
-		ASM_FAKE_STACK(_end_, user32, _ebp_);
-		__asm
-		{
-			push 0x00
-			push pet_id
-			push soul
-			jmp func
-		}
-	}
-	else {
-		func(pet_id, 0x00);
-	}
-_end_:
-	ASM_FAKE_STACK_END();
-	ASM_RESTORE_ECX();
+	
 }
 
 // 宠物召回
 void Game::Call_PetIn(int pet_id)
 {
-	DWORD _ebp_;
-	DWORD user32 = m_GameCall.User32Ret04;
-	DWORD soul = m_GameCall.SoulRet0C;
-	_FUNC1 func = (_FUNC1)m_GameCall.KillEudenmon;
-	ASM_STORE_ECX();
-	ASM_SET_ECX();
-	if (user32 && soul) {
-		//::printf("user32&&soul\n");
-		ASM_FAKE_STACK(_end_, user32, _ebp_);
-		__asm
-		{
-			push pet_id
-			push soul
-			jmp func
-		}
-	}
-	else {
-		func(pet_id);
-	}
-_end_:
-	ASM_FAKE_STACK_END();
-	ASM_RESTORE_ECX();
+
 }
 
 // 宠物合体
 void Game::Call_PetFuck(int pet_id)
 {
-	::printf("宠物合体:%08X\n", pet_id);
-	DWORD _ebp_;
-	DWORD user32 = m_GameCall.User32Ret04;
-	DWORD soul = m_GameCall.SoulRet0C;
-	_FUNC1 func = (_FUNC1)m_GameCall.AttachEudemon;
-	ASM_STORE_ECX();
-	ASM_SET_ECX();
-	if (user32 && soul) {
-		//::printf("user32&&soul\n");
-		ASM_FAKE_STACK(_end_, user32, _ebp_);
-		__asm
-		{
-			push pet_id
-			push soul
-			jmp func
-		}
-	}
-	else {
-		func(pet_id);
-	}
-_end_:
-	ASM_FAKE_STACK_END()
-	ASM_RESTORE_ECX();
+	
 }
 
 // 宠物解体
 void Game::Call_PetUnFuck(int pet_id)
 {
-	::printf("宠物解体:%08X\n", pet_id);
-	DWORD _ebp_;
-	DWORD user32 = m_GameCall.User32Ret04;
-	DWORD soul = m_GameCall.SoulRet0C;
-	_FUNC1 func = (_FUNC1)m_GameCall.UnAttachEudemon;
-	ASM_STORE_ECX();
-	ASM_SET_ECX();
-	if (user32 && soul) {
-		//::printf("user32&&soul\n");
-		ASM_FAKE_STACK(_end_, user32, _ebp_);
-		__asm
-		{
-			push pet_id
-			push soul
-			jmp func
-		}
-	}
-	else {
-		func(pet_id);
-	}
-_end_:
-	ASM_FAKE_STACK_END()
-	ASM_RESTORE_ECX();
+	
 }
 
 // 宠物技能 key_no=按键索引 1=0 2=1 ...
 void Game::Call_PetMagic(int key_no)
 {
-	return;
-	::printf("宠物技能:%d\n", key_no);
-	_FUNC6 func = (_FUNC6)m_GameCall.KeyNum;
-	DWORD _this = P2DW(m_GameAddr.KeyNumEcxPtr);
-	ASM_STORE_ECX();
-	__asm { mov ecx, _this }
-	func(key_no, 0x00, 0x00, 0x00, 0x00, 0x00);
-	ASM_RESTORE_ECX();
+	
 }
 
 // 获取远程邀请人物信息

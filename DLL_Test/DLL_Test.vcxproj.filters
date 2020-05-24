@@ -45,28 +45,22 @@
     <ClInclude Include="Self\Talk.h">
       <Filter>Self</Filter>
     </ClInclude>
-    <ClInclude Include="Self\Move.h">
-      <Filter>Self</Filter>
-    </ClInclude>
-    <ClInclude Include="Self\GuaiWu.h">
-      <Filter>Self</Filter>
-    </ClInclude>
     <ClInclude Include="Self\GameProc.h">
       <Filter>Self</Filter>
     </ClInclude>
     <ClInclude Include="Self\GameStep.h">
       <Filter>Self</Filter>
     </ClInclude>
-    <ClInclude Include="Self\Magic.h">
-      <Filter>Self</Filter>
-    </ClInclude>
-    <ClInclude Include="Self\Pet.h">
-      <Filter>Self</Filter>
-    </ClInclude>
     <ClInclude Include="Self\GameConf.h">
       <Filter>Self</Filter>
     </ClInclude>
     <ClInclude Include="Self\GameClient.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\Home.h">
+      <Filter>Self</Filter>
+    </ClInclude>
+    <ClInclude Include="Self\HttpClient.h">
       <Filter>Self</Filter>
     </ClInclude>
   </ItemGroup>
@@ -92,28 +86,22 @@
     <ClCompile Include="Self\Talk.cpp">
       <Filter>Self</Filter>
     </ClCompile>
-    <ClCompile Include="Self\Move.cpp">
-      <Filter>Self</Filter>
-    </ClCompile>
-    <ClCompile Include="Self\GuaiWu.cpp">
-      <Filter>Self</Filter>
-    </ClCompile>
     <ClCompile Include="Self\GameProc.cpp">
       <Filter>Self</Filter>
     </ClCompile>
     <ClCompile Include="Self\GameStep.cpp">
       <Filter>Self</Filter>
     </ClCompile>
-    <ClCompile Include="Self\Magic.cpp">
-      <Filter>Self</Filter>
-    </ClCompile>
-    <ClCompile Include="Self\Pet.cpp">
-      <Filter>Self</Filter>
-    </ClCompile>
     <ClCompile Include="Self\GameConf.cpp">
       <Filter>Self</Filter>
     </ClCompile>
     <ClCompile Include="Self\GameClient.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\Home.cpp">
+      <Filter>Self</Filter>
+    </ClCompile>
+    <ClCompile Include="Self\HttpClient.cpp">
       <Filter>Self</Filter>
     </ClCompile>
   </ItemGroup>

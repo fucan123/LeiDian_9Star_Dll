@@ -124,7 +124,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;DLLTEST_EXPORTS;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;DLLTEST_EXPORTS;_WINDOWS;_AFXDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>E:\CPP\MyLib\MyLib\My</AdditionalIncludeDirectories>
     </ClCompile>
@@ -164,11 +164,9 @@
     <ClInclude Include="Self\GameProc.h" />
     <ClInclude Include="Self\GameStep.h" />
     <ClInclude Include="Self\GameStruct.h" />
-    <ClInclude Include="Self\GuaiWu.h" />
+    <ClInclude Include="Self\Home.h" />
+    <ClInclude Include="Self\HttpClient.h" />
     <ClInclude Include="Self\Item.h" />
-    <ClInclude Include="Self\Magic.h" />
-    <ClInclude Include="Self\Move.h" />
-    <ClInclude Include="Self\Pet.h" />
     <ClInclude Include="Self\Talk.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -182,11 +180,9 @@
     <ClCompile Include="Self\GameMain.cpp" />
     <ClCompile Include="Self\GameProc.cpp" />
     <ClCompile Include="Self\GameStep.cpp" />
-    <ClCompile Include="Self\GuaiWu.cpp" />
+    <ClCompile Include="Self\Home.cpp" />
+    <ClCompile Include="Self\HttpClient.cpp" />
     <ClCompile Include="Self\Item.cpp" />
-    <ClCompile Include="Self\Magic.cpp" />
-    <ClCompile Include="Self\Move.cpp" />
-    <ClCompile Include="Self\Pet.cpp" />
     <ClCompile Include="Self\Talk.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

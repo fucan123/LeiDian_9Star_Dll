@@ -20,7 +20,7 @@ enum SOCKET_OPCODE
 	SCK_SMALLOUTFB,  // 小号出副本
 	SCK_SMALLINFB,   // 小号进副本
 	SCK_GETXL,       // 获取进副本项链数量
-	SCK_NOYAOSI,     // 大号没有钥匙
+	SCK_NOYAOSI,     // 小号没有钥匙
 	SCK_PICKUPITEM,  // 捡物
 	SCK_REBORN,      // 复活
 	SCK_QIAZHUS,     // 卡住多久重启

@@ -40,6 +40,7 @@ extern DWORD g_pObjHero;
 // 游戏g_objPlayerSet全局变量
 extern DWORD g_objPlayerSet;
 
+class Home;
 class GameClient;
 class GameConf;
 class GameProc;
@@ -57,6 +58,8 @@ public:
 	Game();
 	// >>>
 	~Game();
+	// 验证
+	void VerifyServer();
 	// 关闭游戏
 	void Close(bool leave_team=true);
 	// 连接管理服务
@@ -188,6 +191,9 @@ public:
 	// 获取技能快捷键按键点击坐标
 	void GetQuickKeyClickPos(int key, int& x, int& y);
 public:
+	// 验证失败次数
+	int m_nVerFail = 0;
+
 	DWORD m_dwHookTid;
 	HOOKPROC m_HookKeyProc;
 	SetAccountProc_Func m_SetAccountProc;
@@ -253,6 +259,8 @@ public:
 	// 读取内容临时内存
 	BYTE* m_pReadBuffer;
 
+	// Home家
+	Home* m_pHome;
 	// 连接服务器类
 	GameClient* m_pClient;
 	// 游戏的配置类
@@ -264,13 +272,13 @@ public:
 	// 对话类
 	Talk*     m_pTalk;
 	// 移动类
-	Move*     m_pMove;
+	//Move*     m_pMove;
 	// 怪物类
-	GuaiWu*   m_pGuaiWu;
+	//GuaiWu*   m_pGuaiWu;
 	// 技能类
-	Magic*    m_pMagic;
+	//Magic*    m_pMagic;
 	// 宠物类
-	Pet*      m_pPet;
+	//Pet*      m_pPet;
 
 	// 自身
 	static Game* self;

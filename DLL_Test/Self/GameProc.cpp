@@ -2,12 +2,8 @@
 #include "GameProc.h"
 #include "Game.h"
 #include "GameConf.h"
-#include "Move.h"
 #include "Item.h"
-#include "GuaiWu.h"
 #include "Talk.h"
-#include "Magic.h"
-#include "Pet.h"
 
 #include <ShlObj_core.h>
 #include <My/Common/mystring.h>
@@ -53,11 +49,8 @@ void GameProc::InitData()
 	m_pStepCopy = nullptr;
 
 	ZeroMemory(&m_stLastStepInfo, sizeof(m_stLastStepInfo));
-	m_pGame->m_pMove->InitData();
 	m_pGame->m_pItem->InitData();
 	m_pGame->m_pTalk->InitData();
-	m_pGame->m_pGuaiWu->InitData();
-	m_pGame->m_pPet->InitData();
 }
 
 // 取消所有旗帜按钮
@@ -101,6 +94,7 @@ void GameProc::Exec()
 	if (m_pGame->IsInFB()) { // 在副本里面
 		if (have_team) { // 有队伍, 继续刷
 			m_bAtFB = true;
+			m_pGame->m_pClient->Send(SCK_ATFB, true);
 			return;
 		}
 		else {
@@ -157,6 +151,7 @@ void GameProc::Run()
 	//m_pGame->m_pGameConf->ReadConf(m_pGame->m_chPath);
 	if (!m_pGameStep->InitSteps(m_pGame->m_chPath, m_pGame->m_pGameConf->m_Setting.FBFile)) {
 		printf("初始化步骤失败，无法继续运行！！！\n");
+		m_pGame->VerifyServer();
 		return;
 	}
 start:
@@ -165,7 +160,7 @@ start:
 	if (m_bPause) {
 		printf("按C开始\n");
 	}
-	while (m_bPause) {
+	while (0 && m_bPause) {
 		Sleep(500);
 	}
 	//ReadQuickKey2Num();
@@ -173,7 +168,7 @@ start:
 	m_dwKairi = 0;
 	int n = 0;
 	int exec_time = time(nullptr) + 2;
-	while (true) {
+	while (0) {
 		int c = exec_time - time(nullptr);
 		if (c >= 0 && n != c) {
 			printf("准备开始执行[%02d秒]\n", c);
@@ -185,9 +180,16 @@ start:
 		Sleep(500);
 	}
 
+	
+
 	printf("开始执行流程\n");
-	m_pGame->m_pPet->PetOut(m_pGame->m_pGameConf->m_stPetOut.No, m_pGame->m_pGameConf->m_stPetOut.Length, true);
+	
+	//m_pGame->m_pPet->PetOut(m_pGame->m_pGameConf->m_stPetOut.No, m_pGame->m_pGameConf->m_stPetOut.Length, true);
 	Exec();
+	
+	//m_pGame->VerifyServer();
+
+	
 	//Drv_MouseMovAbsolute(m_pGame->m_GameWnd.Rect.left, m_pGame->m_GameWnd.Rect.top);
 	//INLOGVARN(32, "Step:%08x Stop:%d", step, m_bStop);
 	bool send_at = false, send_out = true;
@@ -207,7 +209,7 @@ start:
 		else {
 			send_at = false;
 		}
-		Sleep(1000);
+		Sleep(5000);
 	}
 	//GoLeiMing();
 	//while (ExecStep(m_pGameStep->m_Step));
@@ -290,6 +292,7 @@ void GameProc::ViteInFB()
 	}
 
 	m_bAtFB = true;
+	m_pGame->m_pClient->Send(SCK_ATFB, true);
 	SendMsg("邀请进副本完成.");
 }
 
@@ -317,6 +320,7 @@ void GameProc::AgreeInFB()
 		if (Button(BUTTON_ID_INFB, 0, "同意")) {
 			Wait(3 * 1000);
 			m_bAtFB = true;
+			m_pGame->m_pClient->Send(SCK_ATFB, true);
 			printf("已同意\n");
 			return;
 		}	
@@ -440,6 +444,8 @@ bool GameProc::GoInFB()
 		else {
 			//m_pGame->m_pClient->Send(SCK_NOYAOSI, true);
 			SendMsg("无卡利亚堡钥匙, 用项链进入.");
+			m_pGame->m_pClient->Send(SCK_NOYAOSI, true);
+			return false;
 		}
 	}
 
@@ -510,6 +516,7 @@ void GameProc::ContinueInFB()
 
 		if (m_pGame->IsInFB()) {
 			m_bAtFB = true;
+			m_pGame->m_pClient->Send(SCK_ATFB, true);
 			break;
 		}
 		Sleep(1000);
@@ -559,6 +566,7 @@ end:
 // 执行副本流程
 void GameProc::ExecInFB()
 {
+#if 0
 	m_bSendOut = false;
 	if (m_pGame->IsBig()) {
 		printf("执行副本流程\n");
@@ -582,6 +590,7 @@ void GameProc::ExecInFB()
 		m_pGameStep->ResetStep(0);
 		GoFBDoor();
 	}
+#endif
 }
 
 #if USE_MY_LINK
@@ -591,6 +600,7 @@ bool GameProc::ExecStep(Link<_step_*>& link)
 bool GameProc::ExecStep(vector<_step_*>& link)
 #endif
 {
+#if 0
 	m_pStep = m_pGameStep->Current(link);
 	if (!m_pStep)
 		return false;
@@ -793,13 +803,14 @@ bool GameProc::ExecStep(vector<_step_*>& link)
 			return next != nullptr;
 		}
 	} while (true);
-
+#endif
 	return false;
 }
 
 // 步骤是否已执行完毕
 bool GameProc::StepIsComplete()
 {
+#if 0
 	bool result = false;
 	switch (m_pStep->OpCode)
 	{
@@ -858,12 +869,14 @@ bool GameProc::StepIsComplete()
 		break;
 	}
 end:
-	return result;
+#endif
+	return false;
 }
 
 // 移动
 void GameProc::Move()
 {
+#if 0
 	if (m_pStep->X >= 255 && m_pStep->X <= 265 && 
 		m_pStep->Y >= 50 && m_pStep->Y <= 60) { // 通知出去
 		m_bSendOut = true;
@@ -873,11 +886,13 @@ void GameProc::Move()
 	m_stLastStepInfo.MvX = m_pStep->X;
 	m_stLastStepInfo.MvY = m_pStep->Y;
 	m_pGame->m_pMove->Run(m_pStep->X, m_pStep->Y);
+#endif
 }
 
 // NPC
 void GameProc::NPC()
 {
+#if 0
 	// 500 - 930
 	// 560 - 1120
 	// https://31d7f5.link.yunpan.360.cn/lk/surl_yL2uvtfBesv#/-0
@@ -920,20 +935,24 @@ void GameProc::NPC()
 		m_stLastStepInfo.NPCId = npc_id;
 		strcpy(m_stLastStepInfo.NPCName, m_pStep->NPCName);
 	}
+#endif
 }
 
 // 最后一个对话的NPC
 void GameProc::NPCLast()
 {
+#if 0
 	m_pGame->m_pTalk->NPC(m_stLastStepInfo.NPCName);
 	Wait(1 * 1000);
 	m_pGame->m_pTalk->NPCTalk(0x00);
 	Wait(500);
+#endif
 }
 
 // 选择
 void GameProc::Select()
 {
+#if 0
 	if (!m_stLastStepInfo.NPCId) // 没有与NPC对话, 没必要再选择
 		return;
 
@@ -994,11 +1013,13 @@ void GameProc::Select()
 			}
 		}
 	}
+#endif
 }
 
 // 技能
 void GameProc::Magic()
 {
+#if 0
 	if (m_pStep->WaitMs) { // 需要等待冷却
 		while (!m_pGame->m_pMagic->CheckCd(m_pStep->Magic)) {
 			Sleep(100);
@@ -1012,6 +1033,7 @@ void GameProc::Magic()
 	m_pGame->m_pMagic->UseMagic(m_pStep->Magic, x, y);
 	strcpy(m_stLastStepInfo.Magic, m_pStep->Magic);
 	Sleep(50);
+#endif
 }
 
 // 技能-宠物
@@ -1025,6 +1047,7 @@ void GameProc::MagicPet()
 // 狂甩
 void GameProc::Crazy()
 {
+#if 0
 	m_bIsCrazy = strstr(m_pStep->Magic, "结束") ? false : true;
 	strcpy(m_CrazyMagic, m_pStep->Magic);
 	if (m_bIsCrazy) {
@@ -1033,6 +1056,7 @@ void GameProc::Crazy()
 	else {
 		printf("狂甩模式结束\n");
 	}
+#endif
 }
 
 // 清怪
@@ -1043,17 +1067,20 @@ void GameProc::Clear()
 // 捡物
 void GameProc::PickUp()
 {
+#if 0
 	for (int i = 1; i <= 2; i++) {
 		printf("第%d次捡物\n", i);
 		m_pGame->m_pItem->PickUpItem(m_pGame->m_pGameConf->m_stPickUp.PickUps, 
 			m_pGame->m_pGameConf->m_stPickUp.Length);
 		Sleep(1000);
 	}
+#endif
 }
 
 // 存钱
 void GameProc::SaveMoney()
 {
+#if 0
 	Button(BUTTON_ID_ROLE, 1000);           // 点击人物按钮  
 	Button(BUTTON_ID_VIP, 1000);            // 点击VIP按钮   
 	if (Button(BUTTON_ID_CHECKIN, 1000)) {  // 点击物品仓库按钮
@@ -1061,11 +1088,14 @@ void GameProc::SaveMoney()
 		Wait(500);
 		Button(BUTTON_ID_CLOSECKIN); // 点击关闭仓库按钮
 	}
+#endif
 }
 
 // 存物
 DWORD GameProc::CheckIn(bool in)
 {
+	return 0;
+#if 0
 	HWND child, parent;
 
 	Button(BUTTON_ID_ROLE, 1000);           // 点击人物按钮  
@@ -1087,12 +1117,15 @@ DWORD GameProc::CheckIn(bool in)
 	
 	Button(BUTTON_ID_CLOSECKIN); // 点击关闭仓库按钮
 	return count;
+#endif
 }
 
 // 使用物品
 void GameProc::UseItem()
 {
+#if 0
 	m_pGame->m_pItem->UseSelfItem(m_pStep->Name, m_pStep->X, m_pStep->Y, m_pStep->Extra[0]);
+#endif
 }
 
 // 扔物品
@@ -1107,16 +1140,17 @@ void GameProc::DropItem()
 			live_count = m_iNeedBao;
 	}
 	m_pGame->m_pItem->DropSelfItemByName(m_pStep->Name, live_count);
-#endif
 	if (strcmp("速效治疗包", m_pStep->Name) == 0) {
 		m_pGame->m_pItem->ReadYaoBao(0);
 		m_pGame->m_pItem->ReadYaoBao(1);
 	}
+#endif
 }
 
 // 售卖物品
 void GameProc::SellItem()
 {
+#if 0
 	const char* name = "维德尼娜";
 	int x = 295, y = 490;
 	if (m_pGame->IsInArea(x, y))
@@ -1164,6 +1198,7 @@ sell:
 	Button(BUTTON_ID_CLOSESHOP, 500, "CLOSE"); // 点击关闭商店按钮
 
 	m_bLockGoFB = false;
+#endif
 }
 
 // 按钮
@@ -1190,10 +1225,12 @@ bool GameProc::Button(int button_id, DWORD sleep_ms, const char* name)
 void GameProc::Wait()
 {
 	if (strlen(m_pStep->Magic)) { // 等待技能冷却
+#if 0
 		while (!m_pGame->m_pMagic->CheckCd(m_pStep->Magic, m_pStep->WaitMs)) {
 			Sleep(100);
 		}
 		strcpy(m_stLastStepInfo.Magic, m_pStep->Magic);
+#endif
 	}
 	else { // 等待
 		Wait(m_pStep->WaitMs);

@@ -44,13 +44,13 @@
 #define HOOK_KBD_FUNC       0xD3B990      // 游戏WH_KETBOARD钩子处理函数地址
 #define HOOK_MOUSE_FUNC     0xD3B5F0      // 游戏WH_MOUSE钩子处理函数地址
 
-#define ADDR_ACCOUNT_NAME   0x0ED2620     // 登录帐号名称
-#define ADDR_ROLE_NAME      0x0F0B67C     // 游戏角色名称
+#define ADDR_ACCOUNT_NAME   0x0EDF658     // 登录帐号名称
+#define ADDR_ROLE_NAME      0x0F186B4     // 游戏角色名称
 #define ADDR_SERVER_NAME    0x11BD7E4     // 游戏区服名称
-#define ADDR_COOR_X_OFFSET  0x0F53C04     // X坐标地址在模块里面的偏移[MOD_3drole]
-#define ADDR_COOR_Y_OFFSET  0x0F53C00     // Y坐标地址在模块里面的偏移[MOD_3drole]
-#define ADDR_LIFE_OFFSET    0x0F0B5B0     // 血量地址在模块里面的偏移[MOD_3drole]
-#define ADDR_LIFEMAX_OFFSET 0x0F0B5B4     // 血量上限地址在模块里面的偏移[MOD_3drole]
+#define ADDR_COOR_X_OFFSET  0x0F60C3C     // X坐标地址在模块里面的偏移[MOD_3drole]
+#define ADDR_COOR_Y_OFFSET  0x0F60C38     // Y坐标地址在模块里面的偏移[MOD_3drole]
+#define ADDR_LIFE_OFFSET    0x0F185E8     // 血量地址在模块里面的偏移[MOD_3drole]
+#define ADDR_LIFEMAX_OFFSET 0x0F185EC     // 血量上限地址在模块里面的偏移[MOD_3drole]
 // mov eax,[edi+00005394] << EDI=05B7D020
 #define ADDR_TALKBOX_REAL   (PtrToDword(ADDR_TALKBOX_PTR)+0x5394)
 #define CHD_TALBOX_STATUS   0x00         // 0-对话框没有打开 1-打开
@@ -234,8 +234,10 @@ typedef struct game_wnd
 enum ITEM_TYPE
 {
 	未知物品          = 0x00,       // 不知道什么物品
+	白羊星卡迪礼包     = 0x000B21B1, 
 	速效治疗包        = 0x000B5593, // 可以开出几瓶速效治疗药水
 	神恩治疗药水      = 0x000B783C,
+	双子星紫冥礼包    = 0x000C6FD8,
 	速效治疗药水      = 0x000F6982, // +2500生命值
 	速效圣兽灵药      = 0x000F943E, // 复活宝宝的
 	三十星神兽碎片加1  = 0x000F90E4,

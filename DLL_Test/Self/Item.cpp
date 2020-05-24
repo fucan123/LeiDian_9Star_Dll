@@ -24,14 +24,6 @@ void Item::InitData()
 DWORD Item::GetYaoCount(int* p_index)
 {
 	int count = 0;
-	for (int i = 0; i < YAO_BAO_L; i++) {
-		if (m_Yao[i] != 0) {
-			if (p_index)
-				*p_index = i;
-
-			count++;
-		}	
-	}
 	return count;
 }
 
@@ -54,24 +46,7 @@ DWORD Item::GetBaoCount(int* p_index)
 DWORD Item::UseYao()
 {
 	DWORD id = 0;
-	int index = 0;
-	DWORD count = GetYaoCount(&index);
-	printf("药数量:%d[%d]\n", count, index);
-	if (count == 0) {
-		ReadYaoBao(0);
-		count = GetYaoCount(&index);
-		printf("药数量2:%d[%d]\n", count, index);
-		if (count == 0) {
-			printf("使用药包\n");
-			UseBao();
-		}
-	}
-	if (count > 0) {
-		id = m_Yao[index];
-		m_pGame->Call_UseItem(id);
-		m_Yao[index] = 0;
-	}
-	
+
 	return id;
 }
 
@@ -79,19 +54,6 @@ DWORD Item::UseYao()
 DWORD Item::UseBao()
 {
 	DWORD id = 0;
-	int index = 0;
-	DWORD count = GetBaoCount(&index);
-	printf("药包数量:%d[%d]\n", count, index);
-	if (count == 0) {
-		ReadYaoBao(1);
-		count = GetBaoCount(&index);
-		printf("药包数量2:%d[%d]\n", count, index);
-	}
-	if (count > 0) {
-		id = m_Bao[index];
-		m_pGame->Call_UseItem(id);
-		m_Bao[index] = 0;
-	}
 
 	return id;
 }
@@ -99,29 +61,8 @@ DWORD Item::UseBao()
 // 读取药包
 int Item::ReadYaoBao(int flag)
 {
-	DWORD* arr = flag == 0 ? m_Yao : m_Bao;
-	ITEM_TYPE type = flag == 0 ? 速效治疗药水 : 速效治疗包;
-	ZeroMemory(arr, sizeof(DWORD) * YAO_BAO_L);
-
-	GameSelfItem* items[120];
-	DWORD dwCount = ReadSelfItems(items, 120);
 	DWORD index = 0;
-	for (DWORD i = 0; i < dwCount; i++) {
-		SelfItem info;
-		if (!GetSelfItemInfo(items[i], info)) {
-			printf("无法获取背包物品信息(%d) %08X\n", GetLastError(), items[i]);
-			continue;
-		}
-		//printf("类型:%08X=%08X %s\n", info.Type, type, info.Name);
-		if (items[i] && info.Type == type) {
-			if (index >= YAO_BAO_L)
-				break;
 
-			arr[index++] = info.Id;
-		}
-	}
-
-	printf("读取:%s(%d)\n", flag == 0 ? "速效治疗药水" : "速效治疗包", index);
 	return index;
 }
 
@@ -332,30 +273,7 @@ DWORD Item::UseSelfItemByType(ITEM_TYPE type, DWORD use_count)
 DWORD Item::SellSelfItem(ConfItemInfo* items, DWORD length)
 {
 	DWORD dwSellCount = 0;
-	GameSelfItem* self_items[120];
-	DWORD dwCount = ReadSelfItems(self_items, 120);       // 背包物品
-	printf("背包物品数量:%d\n", dwCount);
-	for (DWORD i = 0; i < dwCount; i++) {
-		if (!self_items[i])
-			continue;
-
-		SelfItem info;
-		if (!GetSelfItemInfo(self_items[i], info)) {
-			printf("无法获取背包物品信息(%d) %08X\n", GetLastError(), items[i]);
-			continue;
-		}
-		for (DWORD j = 0; j < length; j++) {
-			bool is_sell = strstr(info.Name, items[j].Name) != nullptr
-				|| items[j].Type == info.Type;
-			if (is_sell) {    // 是要售卖的物品
-				printf("卖出物品:%s\n", items[j].Name);
-				m_pGame->Call_SellItem(info.Id); // 出售
-				dwSellCount++;
-				Sleep(600);
-				break;
-			}
-		}
-	}
+	
 	return dwSellCount;
 }
 
@@ -363,30 +281,7 @@ DWORD Item::SellSelfItem(ConfItemInfo* items, DWORD length)
 DWORD Item::CheckInSelfItem(ConfItemInfo* items, DWORD length)
 {
 	DWORD dwCheckInCount = 0;
-	GameSelfItem* self_items[120];
-	DWORD dwCount = ReadSelfItems(self_items, 120);       // 背包物品
-	printf("背包物品数量:%d\n", dwCount);
-	for (DWORD i = 0; i < dwCount; i++) {
-		if (!self_items[i])
-			continue;
-
-		SelfItem info;
-		if (!GetSelfItemInfo(self_items[i], info)) {
-			printf("无法获取背包物品信息(%d) %08X\n", GetLastError(), items[i]);
-			continue;
-		}
-		for (DWORD j = 0; j < length; j++) {
-			bool is_check_in = strstr(info.Name, items[j].Name) != nullptr
-				|| items[j].Type == info.Type;
-			if (is_check_in) {    // 是要存入的物品
-				printf("存入物品:%s\n", items[j].Name);
-				m_pGame->Call_CheckInItem(info.Id); // 存入
-				dwCheckInCount++;
-				Sleep(600);
-				break;
-			}
-		}
-	}
+	
 	return dwCheckInCount;
 }
 
@@ -404,25 +299,7 @@ DWORD Item::DropSelfItem(DWORD item_id)
 DWORD Item::DropSelfItemByName(const char* name, DWORD live_count)
 {
 	DWORD dwDropNum = 0; // 丢弃的数量
-	DWORD dwNum = 0;     // 拥有的数量
-	GameSelfItem* items[120];
-	DWORD dwCount = ReadSelfItems(items, 120);
-	for (DWORD i = 0; i < dwCount; i++) {
-		SelfItem info;
-		if (!GetSelfItemInfo(items[i], info)) {
-			printf("无法获取背包物品信息(%d) %08X\n", GetLastError(), items[i]);
-			continue;
-		}
 
-		if (items[i] && strstr(info.Name, name)) {
-			if (++dwNum > live_count) { // 拥有的数量大于要保留的数量
-				dwDropNum++;
-				DropSelfItem(info.Id);
-				Sleep(200);
-			}
-		}
-
-	}
 	return dwDropNum;
 }
 
@@ -430,25 +307,7 @@ DWORD Item::DropSelfItemByName(const char* name, DWORD live_count)
 DWORD Item::DropSelfItemByType(ITEM_TYPE type, DWORD live_count)
 {
 	DWORD dwDropNum = 0; // 丢弃的数量
-	DWORD dwNum = 0;     // 拥有的数量
-	GameSelfItem* items[120];
-	DWORD dwCount = ReadSelfItems(items, 120);
-	for (DWORD i = 0; i < dwCount; i++) {
-		SelfItem info;
-		if (!GetSelfItemInfo(items[i], info)) {
-			printf("无法获取背包物品信息(%d) %08X\n", GetLastError(), items[i]);
-			continue;
-		}
-
-		if (items[i] && info.Type == type) {
-			if (++dwNum > live_count) { // 拥有的数量大于要保留的数量
-				dwDropNum++;
-				DropSelfItem(info.Id);
-				Sleep(200);
-			}
-		}
-			
-	}
+	
 	return dwDropNum;
 }
 
@@ -462,44 +321,15 @@ DWORD Item::GetSaveItemCount(const char* name)
 DWORD Item::CheckOutItem(ConfItemInfo* items, DWORD length)
 {
 	DWORD dwCheckOutCount = 0;
-	GameSelfItem* self_items[120];
-	DWORD dwCount = ReadSaveItems(self_items, 120);       // 仓库物品
-	printf("仓库物品数量:%d\n", dwCount);
-	for (DWORD i = 0; i < dwCount; i++) {
-		if (!self_items[i])
-			continue;
-
-		for (DWORD j = 0; j < length; j++) {
-			bool is_check_out = strstr(self_items[i]->Name, items[j].Name) != nullptr
-				|| items[j].Type == self_items[i]->Type;
-			if (is_check_out) {    // 是要存入的物品
-				printf("取出物品:%s %08X\n", items[j].Name, self_items[i]->Id);
-				m_pGame->Call_CheckOutItem(self_items[i]->Id); // 取出
-				dwCheckOutCount++;
-				Sleep(600);
-				break;
-			}
-		}
-	}
+	
 	return dwCheckOutCount;
 }
 
 // 取出物品
 DWORD Item::CheckOutItem(const char* name, DWORD out_count)
 {
-	GameSelfItem* items[120];
-	DWORD dwCount = ReadSaveItems(items, sizeof(items), name);
-	if (out_count && out_count > dwCount) { // 数量不够
-		return 0;
-	}
-	if (out_count == 0) {
-		out_count = dwCount;
-	}
-	for (DWORD i = 0; i < out_count; i++) {
-		printf("%d.取出物品:%s %08X\n", i+1, items[i]->Name, items[i]->Id);
-		m_pGame->Call_CheckOutItem(items[i]->Id);
-		Sleep(800);
-	}
+	DWORD dwCount = 0; // ReadSaveItems(items, sizeof(items), name);
+
 	return dwCount;
 }
 

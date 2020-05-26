@@ -296,8 +296,11 @@ void GameClient::OnRead(const char* host, USHORT port, int opcode, const char* d
 	if (opcode != SCK_PING)
 		printf("接受>>指令:%d 数据长度：%d\n", opcode, len);
 #endif
-	if (self->m_pGame->m_nVerFail >= 10)
+	if (self->m_pGame->m_nVerFail >= 10) {
+		//::MessageBoxA(NULL, "self->m_pGame->m_nVerFail >= 10", "...", MB_OK);
 		return;
+	}
+
 	/*for (int i = 0; i < 4; i++) {
 		printf("%02x ", data[i] & 0xff);
 	}

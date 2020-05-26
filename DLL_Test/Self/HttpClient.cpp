@@ -1,159 +1,152 @@
 #include "HttpClient.h"
 #include <My/Common/Des.h>
+#include <stdio.h>
 
-HTTP_STATUS HttpClient::Request(const WCHAR* host, const WCHAR* path, std::string& result, int type)
+HTTP_STATUS HttpClient::Request(const char* host, const char* path, int port, std::string& result, const char* post_con, int type)
 {
 	result = "";
-
 	HTTP_STATUS status = 0;
-	CInternetSession session(NULL);
-	session.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 15000);
-	try {
-		//printf("%s%s\n", HOST_NAME, path);
-		//MessageBox(NULL, m_SendParam, L"发送的参数", MB_OK);
-		CHttpConnection* pServer;
-		if (host) {
-			pServer = session.GetHttpConnection(host, (INTERNET_PORT)80);
+
+	WSADATA     wsaData;
+	SOCKET      socket_client;
+	SOCKADDR_IN server_in;
+	int         iaddrSize = sizeof(SOCKADDR_IN);
+	DWORD       dwThreadId;
+
+	WSAStartup(0x0202, &wsaData);
+
+	socket_client = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+
+	server_in.sin_family = AF_INET;
+	server_in.sin_port = htons(port);
+
+	if (!strstr(host, "com")) {
+		server_in.sin_addr.S_un.S_addr = inet_addr(host);
+	}
+	else {
+		struct hostent *host_ent = gethostbyname(host);
+		char *ip;
+		ip = inet_ntoa(*(struct in_addr *)*host_ent->h_addr_list);
+		memcpy(&server_in.sin_addr.S_un.S_addr, host_ent->h_addr_list[0], host_ent->h_length);
+	}
+	if (connect(socket_client, (struct sockaddr *)&server_in, sizeof(server_in)) == SOCKET_ERROR) {
+		printf("connect失败.\n");
+		closesocket(socket_client);
+		WSACleanup();
+		return 0;
+	}
+
+
+	char request_type[8];
+	if (type == HTTP_POST)
+		strcpy(request_type, "POST");
+	else if (type == HTTP_PUT)
+		strcpy(request_type, "PUT");
+	else
+		strcpy(request_type, "GET");
+
+	char heads[1536];
+	char  heads_tmp[] =
+		"%s %s HTTP/1.1\r\n" \
+		"Host: %s\r\n" \
+		"Content-Type: application/x-www-form-urlencoded\r\n" \
+		"Content-Length: %d\r\n" \
+		"Connection: Close\r\n\r\n" \
+		"%s";
+
+	sprintf_s(heads, heads_tmp, request_type, path, host, strlen(post_con), post_con);
+	//printf(heads);
+
+	send(socket_client, heads, strlen(heads), 0);
+
+	std::string response;
+	char ch;
+	while (recv(socket_client, &ch, 1, 0)) {
+		response += ch;
+	}
+
+	if (response.length() == 0)
+		return 0;
+
+	size_t res_head_end = response.find("\r\n\r\n");
+	if (res_head_end == std::string::npos)
+		return 0;
+
+	size_t res_length = (size_t)response.c_str() + res_head_end + 4;
+	size_t res_con_start = response.find("\r\n", res_head_end + 4);
+	if (res_con_start == std::string::npos)
+		return 0;
+	//printf("res_length:%lld res_con_start:%lld\n", res_length, res_con_start);
+	//printf(response.c_str() + res_head_end + 2);
+
+	int con_length = HexToInt(response.c_str() + res_head_end + 4, 0);
+	if (con_length == 0)
+		return 0;
+	//printf("长度:%d\n", HexToInt(response.c_str() + res_head_end + 4, 0))
+
+	result.empty();
+	for (size_t j = 0, i = res_con_start + 2; j < con_length; j++, i++) {
+		result += response[i];
+	}
+
+	//printf(result.c_str());
+
+	closesocket(socket_client);
+	WSACleanup();
+
+	return 1;
+}
+
+int HttpClient::HexToInt(const char* str, int length)
+{
+	if (str == nullptr)
+		return 0;
+
+	if (str[0] == '0') {
+		if (str[1] == 'x' || str[1] == 'X')
+			str += 2;
+	}
+
+	int i = 0;
+	int num = 0;
+	while (*str) {
+		char ch = *str;
+		if (ch >= '0' && ch <= '9') {
+			ch = ch - '0';
+		}
+		else if (ch >= 'A' && ch <= 'F') {
+			ch = ch - 'A' + 0x0A;
+		}
+		else if (ch >= 'a' && ch <= 'f') {
+			ch = ch - 'a' + 0x0a;
 		}
 		else {
-			pServer = session.GetHttpConnection(HOST_NAME, (INTERNET_PORT)80);
-		}
-		
-		INTERNET_FLAG_SECURE;
-		CHttpFile* pFile = pServer->OpenRequest(type, path);
-		CString strHeaders = _T("Content-Type: application/x-www-form-urlencoded"); // 请求头
-		
-		if (0 && !m_Cookie.IsEmpty()) {
-			CString cookie;
-			if (m_Cookie.Find(L"Cookie") == 0) {
-				cookie += m_Cookie;
-			}
-			else {
-				cookie = L"Cookie: ";
-				cookie += m_Cookie;
-			}
-			
-			pFile->AddRequestHeaders(cookie);
+			ch = 0;
+			break;
 		}
 
-		if (m_SendParam.IsEmpty()) {
-			pFile->SendRequest(NULL, 0, 0, 0);
-		}
-		else {
-			USES_CONVERSION;
-			char* param = T2A(m_SendParam.GetBuffer(0));
-			//printf("参数:%s\n", param);
-			pFile->SendRequest(strHeaders, param, strlen(param));
-		}
-		
-		//printf("param:%s\n", param);
-		// 开始发送请求
-		//printf("发送请求！\n");
-		
-		pFile->QueryInfoStatusCode(status);
-		//printf("HTTP CODE:%d %s\n", status, result.c_str());
-		if (status == HTTP_STATUS_OK) {
-			//printf("读取网页内容\n"); // 读取网页内容
-			CString newline;
-			while (pFile->ReadString(newline)) { // 循环读取每行内容 
-				std::string str;
-				if (m_GB2312) {
-					//printf("转成m_GB2312\n");
-					str = UTF8ToGB((const char*)newline.GetBuffer());
-				}
-				else {
-					str = (const char*)newline.GetBuffer();
-					//printf("%s\n", newline.GetBuffer());
-				}
-				//printf("%s\n", str.c_str());
-				result += str;
-			}
-			//printf("内容:%s结束\n", result.c_str()); // 显示返回内容 
-		}
+		num = num * 0x10 + ch;
+		if (length > 0 && (++i >= length))
+			break;
 
-		if (pFile)
-			delete pFile;
-		if (pServer)
-			delete pServer;
+		str++;
 	}
-	catch (CInternetException* pEx) {
-		TCHAR szErr[1024];
-		CString strInfo;
-		pEx->GetErrorMessage(szErr, 1024);
-		//MessageBox(NULL, szErr, L"oo", MB_OK);
-		printf("错误:服务器未响应！！！\n"); // 显示异常信息 
-		status = 0;
+	return num;
+}
+
+void HttpClient::CharToHext(char* save, char* str, int length)
+{
+	int i = 0, j = 0;
+	for (; i < length; i++) {
+		char tmp[3];
+		sprintf_s(tmp, "%02x", str[i] & 0xff);
+		save[j] = tmp[0];
+		save[j + 1] = tmp[1];
+		j += 2;
 	}
-	session.Close();
-	return status;
 }
 
-void HttpClient::SetCookie(char * cookie)
-{
-	m_Cookie = cookie;
-}
-
-void HttpClient::SetCookie(wchar_t * cookie)
-{
-	m_Cookie = cookie;
-}
-
-void HttpClient::AddParam(const CHAR * content)
-{
-	m_SendParam = content;
-}
-
-void HttpClient::AddParam(CHAR * content)
-{
-	m_SendParam = content;
-}
-
-void HttpClient::AddParam(WCHAR * content)
-{
-	m_SendParam = content;
-}
-
-void HttpClient::AddParam(CString & content)
-{
-	m_SendParam = content;
-}
-
-void HttpClient::AddParam(const CHAR * key, const CHAR * value)
-{
-	m_SendParam += key;
-	m_SendParam += L"=";
-	m_SendParam += value;
-	m_SendParam += L"&";
-}
-
-void HttpClient::AddParam(WCHAR* key, CHAR* value)
-{
-	m_SendParam += key;
-	m_SendParam += L"=";
-	m_SendParam += value;
-	m_SendParam += L"&";
-}
-
-void HttpClient::AddParam(WCHAR* key, WCHAR* value)
-{
-	m_SendParam += key;
-	m_SendParam += L"=";
-	m_SendParam += value;
-	m_SendParam += L"&";
-}
-
-void HttpClient::AddParam(WCHAR* key, CString& value)
-{
-	m_SendParam += key;
-	m_SendParam += L"=";
-	m_SendParam += value;
-	m_SendParam += L"&";
-}
-
-void HttpClient::ResetParam()
-{
-	m_SendParam.Empty();
-}
 
 std::string HttpClient::UTF8ToGB(const char * str)
 {

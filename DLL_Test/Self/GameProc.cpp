@@ -187,8 +187,7 @@ start:
 	//m_pGame->m_pPet->PetOut(m_pGame->m_pGameConf->m_stPetOut.No, m_pGame->m_pGameConf->m_stPetOut.Length, true);
 	Exec();
 	
-	//m_pGame->VerifyServer();
-
+	m_pGame->VerifyServer();
 	
 	//Drv_MouseMovAbsolute(m_pGame->m_GameWnd.Rect.left, m_pGame->m_GameWnd.Rect.top);
 	//INLOGVARN(32, "Step:%08x Stop:%d", step, m_bStop);

@@ -80,14 +80,14 @@ void Game::VerifyServer()
 {
 	int n = 0;
 	while (true) {
-		if (++n == 30) {
+		if (++n == 25) {
 			if (m_pHome->Verify()) {
+				//printf("验证成功.\n");
 				m_nVerFail = 0;
 			}
 			else {
-				if (++m_nVerFail >= 15) {
-					while (true);
-				}
+				//printf("验证失败.\n");
+				if (++m_nVerFail >= 10) { }
 			}
 			n = 0;
 		}

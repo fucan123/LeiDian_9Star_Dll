@@ -370,6 +370,7 @@ get:
 	if (!is_get)
 		return;
 
+	Sleep(8000);
 	m_pGame->m_pTalk->NPC("幻宠师·艾黎");
 	Wait(2 * 1000);
 	m_pGame->m_pTalk->NPCTalk(0x03); // 领取特制经验球
@@ -401,14 +402,21 @@ void GameProc::GoFBDoor()
 	if (m_pGame->IsInArea(x, y))
 		return;
 	for (int j = 0; j < 50; j++) {
+		if (m_pGame->IsInFB()) {
+			SendMsg("已经在副本了.");
+			return;
+		}
+			
 		if (!m_pGame->m_pItem->UseSelfItem("星辰之眼", x, y, 10)) {
 			printf("没有星辰之眼\n");
 			break;
 		}
 		for (int i = 0; i < 5; i++) {
 			Sleep(1000);
-			if (m_pGame->IsInArea(x, y))
+			if (m_pGame->IsInArea(x, y)) {
+				Sleep(6000);
 				return;
+			}	
 		}
 	}
 
@@ -469,7 +477,7 @@ bool GameProc::GoInFB()
 			Wait(2 * 1000);
 
 			if (m_pGame->IsInFB()) {
-				Sleep(2000);
+				Sleep(3000);
 				ViteInFB();
 				m_pGame->m_Account.IsMeOpenFB = true;
 				return true;
@@ -1327,6 +1335,8 @@ int GameProc::IsNeedAddLife()
 		return 0;
 	if (!ReadLife())
 		return 0;
+
+	printf("血量:%d;\n", m_iLife);
 	if (m_iLife == 0)
 		return -1;
 		

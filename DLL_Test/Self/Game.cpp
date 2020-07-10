@@ -80,7 +80,7 @@ void Game::VerifyServer()
 {
 	int n = 0;
 	while (true) {
-		if (++n == 25) {
+		if (++n == 60) {
 			if (m_pHome->Verify()) {
 				//printf("验证成功.\n");
 				m_nVerFail = 0;
@@ -289,16 +289,24 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 		printf("while (true7).\n");
 		Sleep(5000);
 	}
-	while (!m_GameAddr.ItemPtr) {
+	while (0 && !m_GameAddr.ItemPtr) {
 		::printf("获取地面物品地址...\n");
 		ReadGameMemory();
 		Sleep(5000);
 	}
-	while (!m_GameAddr.MapName) {
+	while (0 && !m_GameAddr.MapName) {
 		::printf("获取地图名称地址..\n");
 		ReadGameMemory();
 		Sleep(5000);
 	}
+#if 1
+	while (!m_GameAddr.Life) {
+		::printf("重新读取血量地址...\n");
+		m_pClient->SendMsg("重新读取血量...");
+		ReadGameMemory();
+		Sleep(3000);
+	}
+#endif
 #endif
 	
 	//m_pMagic->ReadMagic(nullptr, nullptr, false);
@@ -306,13 +314,6 @@ bool Game::Init(DWORD hook_tid, SetAccountProc_Func set_account_proc)
 	m_pClient->SendMsg("读取游戏数据完成");
 
 	//::printf("连接键盘和鼠标驱动%s\n", Drv_ConnectDriver()?"成功":"失败");
-#if 0
-	while (!m_GameAddr.Life) {
-		::printf("重新读取血量地址\n");
-		ReadGameMemory();
-		Sleep(1000);
-	}
-#endif
 
 	while (false) {
 		printf("while (true8).\n");
@@ -450,6 +451,9 @@ bool Game::IsInFB()
 // 是否在指定地图
 bool Game::IsInMap(const char* name)
 {
+	if (!m_GameAddr.MapName)
+		return false;
+
 	char map_name[32] = { 0 };
 	if (ReadMemory((PVOID)m_GameAddr.MapName, map_name, sizeof(map_name))) { // 读取地图名称
 		return strcmp(map_name, name) == 0;
@@ -981,15 +985,13 @@ bool Game::FindLifeAddr()
 	::printf("找到生命上限地址：%08X\n", m_GameAddr.LifeMax);
 	return true;
 #else
-	// 4:0x00 4:0x00 4:* 4:0x03 4:0x0A 4:0x18 4:0x29 4:0x00
-	// 4:0x18 4:0x87 4:0x00 4:0x0A 4:* 4:0x00 4:0x0A 4:0x00
+	// 4:* 4:0x00 4:* 4:0x03 4:0x0A 4:0x18 4:0x29 4:0x00
 	DWORD codes[] = {
-		0x00000000, 0x00000000, 0x00000011, 0x00000003,
-		0x0000000A, 0x00000018, 0x00000029, 0x00000000,
+		0x00000003, 0x0000000A, 0x00000018, 0x00000029, 0x00000000
 	};
 	DWORD address = 0;
 	if (SearchCode(codes, sizeof(codes) / sizeof(DWORD), &address, 1, 1)) {
-		m_GameAddr.Life = address + 0x24;
+		m_GameAddr.Life = address + 0x18;
 		m_GameAddr.LifeMax = m_GameModAddr.Mod3DRole + ADDR_LIFEMAX_OFFSET;
 		::printf("找到生命地址：%08X\n", m_GameAddr.Life);
 		::printf("找到生命上限地址：%08X\n", m_GameAddr.LifeMax);

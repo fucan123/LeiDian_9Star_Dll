@@ -298,6 +298,7 @@ void GameClient::OnRead(const char* host, USHORT port, int opcode, const char* d
 #endif
 	if (self->m_pGame->m_nVerFail >= 10) {
 		//::MessageBoxA(NULL, "self->m_pGame->m_nVerFail >= 10", "...", MB_OK);
+		self->SendMsg2("验证失败, 小号停止接受指令.");
 		return;
 	}
 

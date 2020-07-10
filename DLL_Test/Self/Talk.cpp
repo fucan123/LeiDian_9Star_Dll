@@ -126,7 +126,7 @@ bool Talk::GetNPCInfo(PVOID addr, Player& info, bool isid)
 			return false;
 		if (!m_pGame->ReadDwordMemory(ptr + 0xDC, info.Id))
 			return false;
-		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x708), info.Name, sizeof(info.Name)))
+		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x710), info.Name, sizeof(info.Name)))
 			return false;
 
 		info.Name[sizeof(info.Name) - 1] = 0;

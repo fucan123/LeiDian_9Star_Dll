@@ -120,11 +120,13 @@ void Home::Parse(const char* msg, char key_yh[], int key_yh_length, HttpClient& 
 
 	char error_str[] = {e, r, r, o, r, dian, 0};
 	char* msgStr = (char*)msg;
-	char* desStr = strstr(msgStr, "||") + 2;
+	char* desStr = strstr(msgStr, "||");
 	if (!desStr) {
 		m_Error = 1;
 		return;
 	}
+
+	desStr += 2;
 
 	int i = 0, j = 0, n = 0;
 

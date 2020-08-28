@@ -117,16 +117,16 @@ bool Talk::GetNPCInfo(PVOID addr, Player& info, bool isid)
 	ZeroMemory(info.Name, sizeof(info.Name));
 	DWORD ptr = (DWORD)addr;
 	if (isid) {
-		return m_pGame->ReadDwordMemory(ptr + 0xDC, info.Id);
+		return m_pGame->ReadDwordMemory(ptr + 0xE4, info.Id);
 	}
 	else {
 		if (!m_pGame->ReadDwordMemory(ptr + 0x94, info.X))
 			return false;
 		if (!m_pGame->ReadDwordMemory(ptr + 0x98, info.Y))
 			return false;
-		if (!m_pGame->ReadDwordMemory(ptr + 0xDC, info.Id))
+		if (!m_pGame->ReadDwordMemory(ptr + 0xE4, info.Id))
 			return false;
-		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x710), info.Name, sizeof(info.Name)))
+		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x750), info.Name, sizeof(info.Name)))
 			return false;
 
 		info.Name[sizeof(info.Name) - 1] = 0;
@@ -206,8 +206,10 @@ DWORD Talk::ReadNPC(const char* name, GamePlayer** save, DWORD save_count, bool 
 			printf("无法获取NPC信息(%d) %08X\n", GetLastError(), pGamePlayer);
 			continue;
 		}
-		if (player.Id == 0x00)
+		if (player.Id == 0x00) {
+			printf("角色[%08X].Id==0:%s %08X 坐标:%d,%d\n", pGamePlayer, player.Name, player.Id, player.X, player.Y);
 			continue;
+		}	
 
 		DWORD life = player.Life;
 		printf("角色[%08X]:%s %08X 坐标:%d,%d\n", pGamePlayer, player.Name, player.Id, player.X, player.Y);

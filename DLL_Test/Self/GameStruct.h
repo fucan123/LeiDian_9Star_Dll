@@ -44,13 +44,13 @@
 #define HOOK_KBD_FUNC       0xD3B990      // 游戏WH_KETBOARD钩子处理函数地址
 #define HOOK_MOUSE_FUNC     0xD3B5F0      // 游戏WH_MOUSE钩子处理函数地址
 
-#define ADDR_ACCOUNT_NAME   0x102CDE8     // 登录帐号名称
-#define ADDR_ROLE_NAME      0x10666FC     // 游戏角色名称
+#define ADDR_ACCOUNT_NAME   0x1056E40     // 登录帐号名称
+#define ADDR_ROLE_NAME      0x1090B60     // 游戏角色名称
 #define ADDR_SERVER_NAME    0x11BD7E4     // 游戏区服名称
-#define ADDR_COOR_X_OFFSET  0x10AFEBC     // X坐标地址在模块里面的偏移[MOD_3drole]
-#define ADDR_COOR_Y_OFFSET  0x10AFEB8     // Y坐标地址在模块里面的偏移[MOD_3drole]
-#define ADDR_LIFE_OFFSET    0x1066630     // 血量地址在模块里面的偏移[MOD_3drole]
-#define ADDR_LIFEMAX_OFFSET 0x1066630     // 血量上限地址在模块里面的偏移[MOD_3drole]
+#define ADDR_COOR_X_OFFSET  0x10D9C1C     // X坐标地址在模块里面的偏移[MOD_3drole]
+#define ADDR_COOR_Y_OFFSET  0x10D9C18     // Y坐标地址在模块里面的偏移[MOD_3drole]
+#define ADDR_LIFE_OFFSET    0x1090A90     // 血量地址在模块里面的偏移[MOD_3drole]
+#define ADDR_LIFEMAX_OFFSET 0x1090A90     // 血量上限地址在模块里面的偏移[MOD_3drole]
 // mov eax,[edi+00005394] << EDI=05B7D020
 #define ADDR_TALKBOX_REAL   (PtrToDword(ADDR_TALKBOX_PTR)+0x5394)
 #define CHD_TALBOX_STATUS   0x00         // 0-对话框没有打开 1-打开

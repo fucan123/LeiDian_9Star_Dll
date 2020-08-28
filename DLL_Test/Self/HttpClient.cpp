@@ -58,11 +58,12 @@ HTTP_STATUS HttpClient::Request(const char* host, const char* path, int port, st
 	sprintf_s(heads, heads_tmp, request_type, path, host, strlen(post_con), post_con);
 	//printf(heads);
 
-	send(socket_client, heads, strlen(heads), 0);
+	if (send(socket_client, heads, strlen(heads), 0) <= 0)
+		return 0;
 
 	std::string response;
 	char ch, r = 0;
-	while (recv(socket_client, &ch, 1, 0)) {
+	while (recv(socket_client, &ch, 1, 0) > 0) {
 		if (ch == '\r' && !r) {
 			r = ch;
 			if (response.find("222 OK") == std::string::npos)

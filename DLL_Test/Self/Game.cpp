@@ -991,7 +991,7 @@ bool Game::FindLifeAddr()
 	};
 	DWORD address = 0;
 	if (SearchCode(codes, sizeof(codes) / sizeof(DWORD), &address, 1, 1)) {
-		m_GameAddr.Life = address + 0x14;
+		m_GameAddr.Life = address + 0x18;
 		m_GameAddr.LifeMax = m_GameModAddr.Mod3DRole + ADDR_LIFEMAX_OFFSET;
 		::printf("找到生命地址：%08X\n", m_GameAddr.Life);
 		::printf("找到生命上限地址：%08X\n", m_GameAddr.LifeMax);

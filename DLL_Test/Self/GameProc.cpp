@@ -370,14 +370,24 @@ get:
 	if (!is_get)
 		return;
 
+	//printf("去领项链o\n");
 	Sleep(8000);
-	m_pGame->m_pTalk->NPC("幻宠师·艾黎");
+
+	SendMsg("对话人艾黎");
+	m_pGame->m_pTalk->NPC("艾黎");
 	Wait(2 * 1000);
+
+	SendMsg("领项链");
 	m_pGame->m_pTalk->NPCTalk(0x03); // 领取特制经验球
+	Wait(1 * 1000);
+	m_pGame->m_pTalk->NPCTalk(0xff);
 
 	// 每天领3次项链
-	m_pGame->m_pTalk->NPC("幻宠师·艾黎");
+	SendMsg("对话人艾黎");
+	m_pGame->m_pTalk->NPC("艾黎");
 	Wait(2 * 1000);
+
+	SendMsg("领特球");
 	m_pGame->m_pTalk->NPCTalk(0x04);
 
 	Wait(1 * 1000);
@@ -470,6 +480,8 @@ bool GameProc::GoInFB()
 				continue;
 			}
 
+			Wait(1 * 1000);
+			m_pGame->m_pTalk->NPCTalk(0x01);
 			Wait(1 * 1000);
 			m_pGame->m_pTalk->NPCTalk(select_no);
 			Wait(1 * 1000);

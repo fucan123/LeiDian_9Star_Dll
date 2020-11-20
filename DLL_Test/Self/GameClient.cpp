@@ -155,8 +155,8 @@ void GameClient::SmallOutFB()
 	if (!m_pGame->IsBig()) {
 		SendMsg("暂时出副本");
 		m_pGame->m_pGameProc->GoOutFB("卡利亚堡传送门", false, true);
-		Sleep(1000);
-		m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
+		//Sleep(1000);
+		//m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
 	}	
 }
 

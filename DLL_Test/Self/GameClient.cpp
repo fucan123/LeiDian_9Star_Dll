@@ -81,7 +81,8 @@ void GameClient::Account(const char * data, int len)
 	int big = P2INT(tmp + 8);
 	int getxl_logout = P2INT(tmp + 0x0C);
 	int create_team = P2INT(tmp + 0x10);
-	self->m_pGame->SetAccount(ser_big, ser_small, name, pwd, role_no, getxl, big, getxl_logout, create_team);
+	int out_no_xl = P2INT(tmp + 0x14);
+	self->m_pGame->SetAccount(ser_big, ser_small, name, pwd, role_no, getxl, big, getxl_logout, create_team, out_no_xl);
 	self->m_pGame->SetPath(path);
 	self->Send(SCK_LOGIN, true); // 发送可以登录
 }
@@ -136,8 +137,10 @@ void GameClient::OutFB()
 {
 	if (!m_pGame->IsBig()) {
 		m_pGame->m_pGameProc->GoOutFB("卡利亚堡传送门");
-		//Sleep(1000);
-		//m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
+		if (!m_pGame->m_Account.OutNoGoXL) { // 离开去项链
+			Sleep(1000);
+			m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
+		}
 	}	
 }
 
@@ -155,8 +158,10 @@ void GameClient::SmallOutFB()
 	if (!m_pGame->IsBig()) {
 		SendMsg("暂时出副本");
 		m_pGame->m_pGameProc->GoOutFB("卡利亚堡传送门", false, true);
-		//Sleep(1000);
-		//m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
+		if (!m_pGame->m_Account.OutNoGoXL) { // 离开去项链
+			Sleep(1000);
+			m_pGame->m_pItem->UseSelfItem("星辰之眼", 250, 500, 10);
+		}
 	}	
 }
 

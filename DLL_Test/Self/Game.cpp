@@ -353,7 +353,7 @@ void Game::SetPath(const char * path)
 }
 
 // 设置是否是大号
-void Game::SetAccount(const char* ser_big, const char* ser_small, const char* name, const char* pwd, int role_no, int getxl, int big, int getxl_logout, int create_team)
+void Game::SetAccount(const char* ser_big, const char* ser_small, const char* name, const char* pwd, int role_no, int getxl, int big, int getxl_logout, int create_team, int out_no_xl)
 {
 	if (m_SetAccountProc)
 		m_SetAccountProc(big);
@@ -367,6 +367,7 @@ void Game::SetAccount(const char* ser_big, const char* ser_small, const char* na
 	m_Account.IsBig = big;
 	m_Account.GetXLLogout = getxl_logout;
 	m_Account.CreateTeam = create_team;
+	m_Account.OutNoGoXL = out_no_xl;
 	m_Account.IsReady = true;
 	if (big && m_iDebug) {
 		AllocConsole();
@@ -1131,7 +1132,7 @@ bool Game::FindMapName()
 			::printf("地图名称地址:%08X[%s] %d\n", m_GameAddr.MapName, name, name[0]);
 
 			if (name[0] == 0 || name[0] == 0xff) {
-				m_pClient->SendMsg("没有找到地图名称, 重启游戏机.|red");
+				//m_pClient->SendMsg("没有找到地图名称, 重启游戏机.|red");
 				//Close(false);
 			}
 			else {

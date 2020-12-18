@@ -31,6 +31,7 @@ typedef struct _account_
 	int  GetXLTime;    // 领取项链时间
 	int  GetXLLogout;  // 领取项链后是否退出
 	int  CreateTeam;   // 是否创建队伍
+	int  OutNoGoXL;    // 离开不去项链
 	bool IsReady;      // 是否已准备好
 	bool IsMeOpenFB;   // 是否是自己开副本的
 } Account;
@@ -77,7 +78,7 @@ public:
 	// 设置路径
 	void SetPath(const char* path);
 	// 设置是否是大号
-	void SetAccount(const char* ser_big, const char* ser_small, const char* name, const char* pwd, int role_no, int getxl, int big, int getxl_logout, int create_team);
+	void SetAccount(const char* ser_big, const char* ser_small, const char* name, const char* pwd, int role_no, int getxl, int big, int getxl_logout, int create_team, int out_no_xl);
 	// 设置卡住重启时间
 	void SetQiaZhuS(int second);
 	// 设置是否掉线

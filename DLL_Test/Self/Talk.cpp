@@ -117,16 +117,16 @@ bool Talk::GetNPCInfo(PVOID addr, Player& info, bool isid)
 	ZeroMemory(info.Name, sizeof(info.Name));
 	DWORD ptr = (DWORD)addr;
 	if (isid) {
-		return m_pGame->ReadDwordMemory(ptr + 0xE4, info.Id);
+		return m_pGame->ReadDwordMemory(ptr + 0xEC, info.Id);
 	}
 	else {
-		if (!m_pGame->ReadDwordMemory(ptr + 0x94, info.X))
+		if (!m_pGame->ReadDwordMemory(ptr + 0x9C, info.X))
 			return false;
-		if (!m_pGame->ReadDwordMemory(ptr + 0x98, info.Y))
+		if (!m_pGame->ReadDwordMemory(ptr + 0xA0, info.Y))
 			return false;
-		if (!m_pGame->ReadDwordMemory(ptr + 0xE4, info.Id))
+		if (!m_pGame->ReadDwordMemory(ptr + 0xEC, info.Id))
 			return false;
-		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x750), info.Name, sizeof(info.Name)))
+		if (!m_pGame->ReadMemory((PVOID)(ptr + 0x760), info.Name, sizeof(info.Name)))
 			return false;
 
 		info.Name[sizeof(info.Name) - 1] = 0;

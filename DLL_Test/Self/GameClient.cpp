@@ -288,7 +288,7 @@ void GameClient::OnConnectError(const char* host, USHORT port)
 
 void GameClient::OnConnect(const char* host, USHORT port, SOCKET s)
 {
-	printf("连接服务器成功[%s:%d]\n", host, port);
+	//printf("连接服务器成功[%s:%d]\n", host, port);
 	self->m_Socket = s;
 	if (strlen(self->m_pGame->m_Account.Role) > 0) {
 		self->SendInGame(self->m_pGame->m_Account.Name, self->m_pGame->m_Account.Role);

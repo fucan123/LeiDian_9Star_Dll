@@ -134,9 +134,9 @@ bool Item::GetSelfItemInfo(PVOID addr, SelfItem& item)
 		return false;
 	if (!m_pGame->ReadMemory((PVOID)(ptr + 16), item.Name, sizeof(item.Name)))
 		return false;
-	if (!m_pGame->ReadDwordMemory(ptr + 784, item.ToX))
+	if (!m_pGame->ReadDwordMemory(ptr + 788, item.ToX))
 		return false;
-	if (!m_pGame->ReadDwordMemory(ptr + 788, item.ToY))
+	if (!m_pGame->ReadDwordMemory(ptr + 792, item.ToY))
 		return false;
 
 	item.Name[sizeof(item.Name) - 1] = 0;

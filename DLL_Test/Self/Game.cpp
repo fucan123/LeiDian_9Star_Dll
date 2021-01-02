@@ -117,7 +117,7 @@ void Game::Close(bool leave_team)
 // 连接管理服务
 void Game::Connect(const char* host, USHORT port)
 {
-	::printf("准备连接服务器[%s:%d]\n", host, port);
+	//::printf("准备连接服务器[%s:%d]\n", host, port);
 	m_pClient->Connect(host, port);
 }
 
